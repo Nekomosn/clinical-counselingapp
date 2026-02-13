@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8"/>
+
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+    <title>Clinical AI Counseling Dashboard</title>
+
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+
+
+    <link rel="stylesheet" href="css/style.css">
+
+
+
+    <script src="js/tailwind.config.js"></script>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-text-primary font-display h-screen flex flex-col overflow-hidden">
+
+
+
+    <header class="h-16 bg-white dark:bg-[#15282a] border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6 shrink-0 z-20">
+
+        <div class="flex items-center gap-4">
+
+            <div class="flex items-center gap-2">
+
+                <span class="material-icons text-primary">psychology</span>
+
+                <h1 class="font-semibold text-lg text-slate-800 dark:text-white">MindSight <span class="font-light text-slate-400">Clinical AI</span></h1>
+
+            </div>
+
+            <div class="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2"></div>
+
+            <div class="flex items-center gap-2 text-sm text-text-secondary">
+
+                <span class="material-icons text-xs">timer</span>
+
+                <span>Session #42</span>
+
+                <span class="mx-1">•</span>
+
+                <span>Patient ID: 883-XJ</span>
+
+            </div>
+
+        </div>
+
+        <div class="flex items-center gap-6">
+
+            <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg" id="mode-toggle-group">
+
+                <button id="mode-acceptance" class="px-4 py-1.5 text-xs font-medium rounded bg-white dark:bg-slate-700 text-primary shadow-sm border border-slate-200 dark:border-slate-600 transition-all">Acceptance</button>
+
+                <button id="mode-strategy" class="px-4 py-1.5 text-xs font-medium rounded text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">Strategy</button>
+
+            </div>
+
+            <div class="flex items-center gap-2 px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full text-xs font-medium border border-green-100 dark:border-green-800">
+
+                <span class="material-icons text-[14px]">lock</span>
+
+                HIPAA Secure
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <main class="flex-1 flex overflow-hidden">
+
+       
+
+        <section class="w-full lg:w-7/12 flex flex-col bg-white dark:bg-[#15282a] border-r border-slate-200 dark:border-slate-700 relative">
+
+           
+
+            <div class="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide" id="chat-container">
+
+                <div class="flex justify-center">
+
+                    <span class="text-xs text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1 rounded-full">Today, 10:23 AM</span>
+
+                </div>
+
+
+
+                <div class="flex justify-end group">
+
+                    <div class="max-w-[80%]">
+
+                        <div class="flex items-center justify-end gap-2 mb-1">
+
+                            <span class="text-xs text-slate-400">User</span>
+
+                        </div>
+
+                        <div class="bg-primary/10 dark:bg-primary/20 text-slate-800 dark:text-slate-100 p-4 rounded-2xl rounded-tr-sm">
+
+                            <p class="leading-relaxed">
+
+                                I feel like <span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-1 rounded border-b border-red-200 dark:border-red-800 cursor-help" title="Emotion: High Negative Valence">everyone hates me</span> because I failed the test. It's just proof that I'm <span class="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-1 rounded border-b border-orange-200 dark:border-orange-800 cursor-help" title="Cognitive Distortion: Labeling">useless</span>.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="flex justify-start">
+
+                    <div class="max-w-[85%]">
+
+                        <div class="flex items-center gap-2 mb-1">
+
+                            <div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-bold">AI</div>
+
+                            <span class="text-xs text-slate-400">Assistant</span>
+
+                            <span class="text-[10px] uppercase tracking-wider text-primary border border-primary/30 px-1.5 py-0.5 rounded bg-primary/5">Validation Lvl 3</span>
+
+                            <span class="text-[10px] uppercase tracking-wider text-slate-500 border border-slate-200 dark:border-slate-600 px-1.5 py-0.5 rounded">Mode: Empathy</span>
+
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-4 rounded-2xl rounded-tl-sm border border-slate-100 dark:border-slate-700 shadow-sm">
+
+                            <p class="leading-relaxed mb-3">
+
+                                I hear how painful that failure feels right now. It sounds like this one event is making you question your entire worth as a person.
+
+                            </p>
+
+                            <div class="flex gap-2 mt-2">
+
+                                <button class="text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-3 py-1.5 rounded hover:border-primary/50 hover:text-primary transition-colors">
+
+                                    Explore "Useless" Label
+
+                                </button>
+
+                                <button class="text-xs bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-3 py-1.5 rounded hover:border-primary/50 hover:text-primary transition-colors">
+
+                                    Check Evidence
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="flex justify-start animate-pulse hidden" id="processing-indicator">
+
+                    <div class="max-w-[85%]">
+
+                        <div class="flex items-center gap-2 mb-1">
+
+                            <div class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+
+                            <span class="text-xs text-slate-400 font-medium">Analyzing cognitive schemas...</span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="p-6 bg-white dark:bg-[#15282a] border-t border-slate-100 dark:border-slate-700 shrink-0">
+
+                <div class="relative">
+
+                    <textarea id="user-input" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 pr-12 text-sm focus:ring-2 focus:ring-primary focus:border-primary resize-none h-24 dark:text-white placeholder-slate-400" placeholder="Type your thoughts here..."></textarea>
+
+                    <div class="absolute bottom-3 right-3 flex gap-2">
+
+                        <button class="p-2 text-slate-400 hover:text-primary transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
+
+                            <span class="material-icons text-xl">mic</span>
+
+                        </button>
+
+                        <button id="send-btn" class="bg-primary hover:bg-primary-dark text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-soft flex items-center gap-1">
+
+                            Send
+
+                            <span class="material-icons text-sm">send</span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="flex justify-between items-center mt-2 px-1">
+
+                    <span class="text-[10px] text-slate-400">AI assist enabled. Analysis runs locally.</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <section class="w-full lg:w-5/12 bg-slate-calm dark:bg-[#0c181a] p-6 overflow-y-auto space-y-6">
+
+            <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Real-time Bio-Markers</h2>
+
+
+
+            <div class="bg-white dark:bg-[#15282a] rounded-xl p-5 shadow-card border border-slate-200/60 dark:border-slate-700">
+
+                <div class="flex justify-between items-center mb-4">
+
+                    <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-sm">Emotion Mapping</h3>
+
+                    <span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-1 rounded">Russel's Circumplex</span>
+
+                </div>
+
+                <div class="relative h-48 w-full border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg chart-grid overflow-hidden">
+
+                    <div class="absolute top-1/2 left-0 w-full h-px bg-slate-300 dark:bg-slate-600"></div>
+
+                    <div class="absolute left-1/2 top-0 h-full w-px bg-slate-300 dark:bg-slate-600"></div>
+
+                    <span class="absolute top-2 left-1/2 -translate-x-1/2 text-[10px] text-slate-400 font-medium bg-slate-50 dark:bg-slate-800 px-1">High Arousal</span>
+
+                    <span class="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-slate-400 font-medium bg-slate-50 dark:bg-slate-800 px-1">Low Arousal</span>
+
+                    <span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-medium bg-slate-50 dark:bg-slate-800 px-1">Negative</span>
+
+                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-medium bg-slate-50 dark:bg-slate-800 px-1">Positive</span>
+
+                   
+
+                    <div id="emotion-dot-container" class="absolute top-[30%] left-[25%] group cursor-pointer transition-all duration-700 ease-out">
+
+                        <div class="w-3 h-3 bg-primary rounded-full shadow-[0_0_15px_rgba(19,218,236,0.6)] animate-pulse"></div>
+
+                        <div id="emotion-tooltip" class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+
+                            Current State: Awaiting Input
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="bg-white dark:bg-[#15282a] rounded-xl p-5 shadow-card border border-slate-200/60 dark:border-slate-700">
+
+                <div class="flex justify-between items-center mb-4">
+
+                    <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-sm">Cognitive Distortion Patterns</h3>
+
+                    <button class="text-primary hover:text-primary-dark">
+
+                        <span class="material-icons text-sm">info</span>
+
+                    </button>
+
+                </div>
+
+                <div id="distortion-list" class="space-y-3">
+
+                    <div class="text-xs text-slate-400 italic">Awaiting analysis...</div>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="sticky bottom-0 mt-auto pt-2 pb-6">
+
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-xl p-4 shadow-lg flex items-center gap-4 border border-slate-700/50 relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all" id="intervention-card">
+
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all"></div>
+
+                    <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
+
+                        <span class="material-icons text-primary">spa</span>
+
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+
+                        <h4 class="text-xs font-medium text-slate-400 uppercase tracking-wide mb-0.5">Recommended Intervention</h4>
+
+                        <p class="font-medium text-sm truncate">Start 3-minute "Box Breathing"</p>
+
+                    </div>
+
+                    <button class="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded text-xs font-semibold shadow-soft shrink-0 transition-colors z-10">Start</button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <script src="js/main.js"></script>
+
+</body>
+
+</html>

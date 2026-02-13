@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+openai
+duckduckgo-search
+python-dotenv
+pydantic
