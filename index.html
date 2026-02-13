@@ -20,11 +20,11 @@
 </head>
 
 <body
-    class="bg-background-light dark:bg-background-dark text-text-primary font-display h-screen flex flex-col overflow-hidden">
+    class="bg-bg-light dark:bg-bg-dark text-txt dark:text-txt-dark font-display h-screen flex flex-col overflow-hidden transition-colors duration-300">
 
     <!-- ===== HEADER ===== -->
     <header
-        class="h-14 glass border-b border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between px-5 shrink-0 z-20">
+        class="h-14 glass border-b border-bdr dark:border-bdr-dark flex items-center justify-between px-5 shrink-0 z-20 transition-colors duration-300">
         <!-- Left: Brand + Session -->
         <div class="flex items-center gap-3">
             <div class="flex items-center gap-2">
@@ -32,14 +32,14 @@
                     class="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-glow">
                     <span class="material-icons text-white text-[16px]">psychology</span>
                 </div>
-                <h1 class="font-semibold text-sm text-slate-800 dark:text-white tracking-tight">MindSight <span
-                        class="font-light text-slate-400">Clinical</span></h1>
+                <h1 class="font-semibold text-sm tracking-tight">MindSight <span
+                        class="font-light text-txt-sub dark:text-txt-sub-dark">Clinical</span></h1>
             </div>
-            <div class="h-5 w-px bg-slate-200 dark:bg-slate-700"></div>
-            <div class="flex items-center gap-2 text-[11px] text-text-secondary">
+            <div class="h-5 w-px bg-bdr dark:bg-bdr-dark"></div>
+            <div class="flex items-center gap-2 text-[11px] text-txt-sub dark:text-txt-sub-dark">
                 <span class="material-icons text-[12px]">timer</span>
                 <span id="session-timer">00:00</span>
-                <span class="text-slate-300 dark:text-slate-600">|</span>
+                <span class="text-bdr dark:text-bdr-dark">|</span>
                 <span id="message-counter">0 msgs</span>
             </div>
         </div>
@@ -47,20 +47,21 @@
         <!-- Right: Controls -->
         <div class="flex items-center gap-3">
             <!-- Mode Toggle -->
-            <div class="flex bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg" id="mode-toggle-group">
+            <div class="flex bg-panel-light dark:bg-panel-dark p-0.5 rounded-lg border border-bdr/50 dark:border-bdr-dark/50 transition-colors duration-300"
+                id="mode-toggle-group">
                 <button id="mode-acceptance"
-                    class="mode-pill px-3 py-1 text-[11px] font-medium rounded bg-white dark:bg-slate-700 text-primary shadow-sm border border-slate-200/80 dark:border-slate-600">
+                    class="mode-pill px-3 py-1 text-[11px] font-medium rounded bg-surface-light dark:bg-surface-dark text-primary shadow-sm border border-bdr dark:border-bdr-dark transition-all duration-200">
                     <span class="material-icons text-[11px] align-middle mr-0.5">favorite</span>Acceptance
                 </button>
                 <button id="mode-strategy"
-                    class="mode-pill px-3 py-1 text-[11px] font-medium rounded text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                    class="mode-pill px-3 py-1 text-[11px] font-medium rounded text-txt-sub dark:text-txt-sub-dark hover:text-txt dark:hover:text-txt-dark transition-all duration-200">
                     <span class="material-icons text-[11px] align-middle mr-0.5">bolt</span>Strategy
                 </button>
             </div>
 
             <!-- Theme Toggle -->
             <button id="theme-toggle"
-                class="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                class="p-1.5 rounded-lg text-txt-sub dark:text-txt-sub-dark hover:text-primary hover:bg-panel-light dark:hover:bg-panel-dark transition-all duration-200"
                 title="Toggle theme">
                 <span id="theme-toggle-dark-icon" class="material-icons text-[18px]">dark_mode</span>
                 <span id="theme-toggle-light-icon" class="material-icons text-[18px] hidden">light_mode</span>
@@ -69,12 +70,12 @@
             <!-- Export -->
             <div class="flex items-center gap-1">
                 <button id="btn-export-json"
-                    class="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                    class="p-1.5 rounded-lg text-txt-sub dark:text-txt-sub-dark hover:text-primary hover:bg-panel-light dark:hover:bg-panel-dark transition-all duration-200"
                     title="Export JSON">
                     <span class="material-icons text-[16px]">download</span>
                 </button>
                 <label
-                    class="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                    class="p-1.5 rounded-lg text-txt-sub dark:text-txt-sub-dark hover:text-primary hover:bg-panel-light dark:hover:bg-panel-dark transition-all duration-200 cursor-pointer"
                     title="Import session">
                     <span class="material-icons text-[16px]">upload</span>
                     <input type="file" id="file-input-import" accept=".json" class="hidden" />
@@ -83,7 +84,7 @@
 
             <!-- Secure Badge -->
             <div
-                class="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-medium border border-emerald-100 dark:border-emerald-800/60">
+                class="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-medium border border-emerald-200/60 dark:border-emerald-700/40 transition-colors duration-300">
                 <span class="material-icons text-[11px]">verified_user</span>
                 HIPAA
             </div>
@@ -94,56 +95,59 @@
     <main class="flex-1 flex overflow-hidden">
 
         <!-- === LEFT: Chat Panel === -->
-        <section class="w-full lg:w-7/12 flex flex-col bg-surface-light dark:bg-surface-dark relative">
+        <section
+            class="w-full lg:w-7/12 flex flex-col bg-surface-light dark:bg-surface-dark border-r border-bdr dark:border-bdr-dark relative transition-colors duration-300">
 
             <!-- Chat Messages -->
             <div class="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin" id="chat-container">
 
-                <!-- Welcome Screen (replaced on first message) -->
+                <!-- Welcome Screen -->
                 <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center slide-up">
                     <div
-                        class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-5 shadow-inner-glow">
+                        class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 dark:from-primary/15 dark:to-primary/5 flex items-center justify-center mb-5 shadow-inner-glow">
                         <span class="material-icons text-primary text-3xl">psychology</span>
                     </div>
-                    <h2 class="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-2">Welcome to MindSight</h2>
-                    <p class="text-sm text-slate-400 max-w-sm mb-6 leading-relaxed">Share your thoughts in a safe space.
-                        I'll analyze cognitive patterns, map your emotional state, and provide evidence-based insights.
-                    </p>
+                    <h2 class="text-lg font-semibold mb-2">Welcome to MindSight</h2>
+                    <p class="text-sm text-txt-sub dark:text-txt-sub-dark max-w-sm mb-6 leading-relaxed">Share your
+                        thoughts in a safe space. I'll analyze cognitive patterns, map your emotional state, and provide
+                        evidence-based insights.</p>
                     <div class="welcome-grid max-w-xs">
                         <div
-                            class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 rounded-lg px-3 py-2 border border-slate-100 dark:border-slate-700/60">
+                            class="flex items-center gap-2 text-[11px] text-txt-sub dark:text-txt-sub-dark bg-panel-light dark:bg-panel-dark rounded-lg px-3 py-2 border border-bdr/60 dark:border-bdr-dark/60 transition-colors duration-300">
                             <span class="material-icons text-primary text-[14px]">favorite</span>
                             Empathetic listening
                         </div>
                         <div
-                            class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 rounded-lg px-3 py-2 border border-slate-100 dark:border-slate-700/60">
+                            class="flex items-center gap-2 text-[11px] text-txt-sub dark:text-txt-sub-dark bg-panel-light dark:bg-panel-dark rounded-lg px-3 py-2 border border-bdr/60 dark:border-bdr-dark/60 transition-colors duration-300">
                             <span class="material-icons text-primary text-[14px]">emoji_objects</span>
                             Pattern detection
                         </div>
                         <div
-                            class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 rounded-lg px-3 py-2 border border-slate-100 dark:border-slate-700/60">
+                            class="flex items-center gap-2 text-[11px] text-txt-sub dark:text-txt-sub-dark bg-panel-light dark:bg-panel-dark rounded-lg px-3 py-2 border border-bdr/60 dark:border-bdr-dark/60 transition-colors duration-300">
                             <span class="material-icons text-primary text-[14px]">insights</span>
                             Emotion mapping
                         </div>
                         <div
-                            class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 rounded-lg px-3 py-2 border border-slate-100 dark:border-slate-700/60">
+                            class="flex items-center gap-2 text-[11px] text-txt-sub dark:text-txt-sub-dark bg-panel-light dark:bg-panel-dark rounded-lg px-3 py-2 border border-bdr/60 dark:border-bdr-dark/60 transition-colors duration-300">
                             <span class="material-icons text-primary text-[14px]">shield</span>
                             Private & secure
                         </div>
                     </div>
                 </div>
 
-                <!-- Processing Indicator (3-dot typing) -->
+                <!-- Processing Indicator -->
                 <div class="flex justify-start hidden" id="processing-indicator">
                     <div class="max-w-[85%]">
                         <div class="flex items-center gap-2 mb-1">
-                            <div class="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                            <div
+                                class="w-5 h-5 rounded-full bg-primary/20 dark:bg-primary/15 flex items-center justify-center">
                                 <span class="material-icons text-primary text-[10px]">psychology</span>
                             </div>
-                            <span class="text-[11px] text-slate-400 font-medium">Analyzing...</span>
+                            <span
+                                class="text-[11px] text-txt-muted dark:text-txt-muted-dark font-medium">Analyzing...</span>
                         </div>
                         <div
-                            class="bg-slate-50 dark:bg-slate-800 rounded-2xl rounded-tl-sm border border-slate-100 dark:border-slate-700 shadow-sm">
+                            class="bg-panel-light dark:bg-panel-dark rounded-2xl rounded-tl-sm border border-bdr/60 dark:border-bdr-dark/60 shadow-card dark:shadow-dark-card transition-colors duration-300">
                             <div class="typing-dots">
                                 <span></span><span></span><span></span>
                             </div>
@@ -154,14 +158,14 @@
 
             <!-- Input Area -->
             <div
-                class="p-4 bg-surface-light dark:bg-surface-dark border-t border-slate-100 dark:border-slate-700/60 shrink-0 input-area">
+                class="p-4 bg-surface-light dark:bg-surface-dark border-t border-bdr/60 dark:border-bdr-dark/60 shrink-0 input-area transition-colors duration-300">
                 <div class="relative">
                     <textarea id="user-input"
-                        class="input-glow w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 pr-24 text-sm focus:ring-0 focus:border-primary resize-none h-20 dark:text-white placeholder-slate-400 transition-all duration-300"
+                        class="input-glow w-full bg-panel-light dark:bg-panel-dark border border-bdr dark:border-bdr-dark rounded-xl px-4 py-3 pr-24 text-sm focus:ring-0 focus:border-primary text-txt dark:text-txt-dark placeholder-txt-muted dark:placeholder-txt-muted-dark resize-none h-20 transition-all duration-300"
                         placeholder="Type your thoughts here... (Shift+Enter for new line)"></textarea>
                     <div class="absolute bottom-2.5 right-2.5 flex items-center gap-1.5">
                         <span id="char-count"
-                            class="text-[10px] text-slate-300 dark:text-slate-600 tabular-nums mr-1">0</span>
+                            class="text-[10px] text-txt-muted dark:text-txt-muted-dark tabular-nums mr-1">0</span>
                         <button id="send-btn"
                             class="bg-primary hover:bg-primary-dark text-white px-3.5 py-1.5 rounded-lg text-[12px] font-semibold transition-all duration-200 shadow-soft flex items-center gap-1 hover:shadow-glow active:scale-95">
                             Send
@@ -174,36 +178,38 @@
 
         <!-- === RIGHT: Analysis Panel === -->
         <section
-            class="hidden lg:flex w-5/12 flex-col bg-slate-calm dark:bg-surface-dark-alt overflow-y-auto scrollbar-thin right-panel">
+            class="hidden lg:flex w-5/12 flex-col bg-panel-light dark:bg-surface-dark-2 overflow-y-auto scrollbar-thin right-panel transition-colors duration-300">
 
             <div class="p-5 space-y-4 flex-1">
-                <h2 class="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 mb-1">Live Analysis</h2>
+                <h2
+                    class="text-[10px] font-bold uppercase tracking-[0.15em] text-txt-muted dark:text-txt-muted-dark mb-1">
+                    Live Analysis</h2>
 
                 <!-- Emotion Mapping Card -->
                 <div
-                    class="bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-card border border-slate-200/60 dark:border-slate-700/60 card-hover">
+                    class="bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-card dark:shadow-dark-card border border-bdr/60 dark:border-bdr-dark/60 card-hover transition-colors duration-300">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-[13px]">Emotion Mapping</h3>
+                        <h3 class="font-semibold text-[13px]">Emotion Mapping</h3>
                         <span
-                            class="text-[9px] bg-slate-100 dark:bg-slate-700 text-slate-500 px-1.5 py-0.5 rounded">Russell's
+                            class="text-[9px] bg-panel-light dark:bg-panel-dark text-txt-sub dark:text-txt-sub-dark px-1.5 py-0.5 rounded border border-bdr/40 dark:border-bdr-dark/40">Russell's
                             Circumplex</span>
                     </div>
                     <div
-                        class="relative h-44 w-full border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg chart-grid overflow-hidden">
+                        class="relative h-44 w-full border border-bdr/60 dark:border-bdr-dark/60 bg-panel-light dark:bg-panel-dark rounded-lg chart-grid overflow-hidden transition-colors duration-300">
                         <!-- Axes -->
-                        <div class="absolute top-1/2 left-0 w-full h-px bg-slate-200/80 dark:bg-slate-600/60"></div>
-                        <div class="absolute left-1/2 top-0 h-full w-px bg-slate-200/80 dark:bg-slate-600/60"></div>
+                        <div class="absolute top-1/2 left-0 w-full h-px bg-bdr dark:bg-bdr-dark"></div>
+                        <div class="absolute left-1/2 top-0 h-full w-px bg-bdr dark:bg-bdr-dark"></div>
                         <!-- Labels -->
                         <span
-                            class="absolute top-1.5 left-1/2 -translate-x-1/2 text-[9px] text-slate-400 font-medium bg-slate-50/80 dark:bg-slate-800/80 px-1">High
+                            class="absolute top-1.5 left-1/2 -translate-x-1/2 text-[9px] text-txt-muted dark:text-txt-muted-dark font-medium bg-panel-light/80 dark:bg-panel-dark/80 px-1">High
                             Arousal</span>
                         <span
-                            class="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[9px] text-slate-400 font-medium bg-slate-50/80 dark:bg-slate-800/80 px-1">Low
+                            class="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[9px] text-txt-muted dark:text-txt-muted-dark font-medium bg-panel-light/80 dark:bg-panel-dark/80 px-1">Low
                             Arousal</span>
                         <span
-                            class="absolute left-1.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 font-medium bg-slate-50/80 dark:bg-slate-800/80 px-1">−</span>
+                            class="absolute left-1.5 top-1/2 -translate-y-1/2 text-[9px] text-txt-muted dark:text-txt-muted-dark font-medium bg-panel-light/80 dark:bg-panel-dark/80 px-1">−</span>
                         <span
-                            class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 font-medium bg-slate-50/80 dark:bg-slate-800/80 px-1">+</span>
+                            class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[9px] text-txt-muted dark:text-txt-muted-dark font-medium bg-panel-light/80 dark:bg-panel-dark/80 px-1">+</span>
                         <!-- Ghost trail container -->
                         <div id="emotion-trail"></div>
                         <!-- Active Dot -->
@@ -215,7 +221,7 @@
                                 class="w-3 h-3 bg-primary rounded-full shadow-[0_0_12px_rgba(19,218,236,0.5)] relative z-10">
                             </div>
                             <div id="emotion-tooltip"
-                                class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-800/95 text-white text-[10px] px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 backdrop-blur-sm">
+                                class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-surface-dark/95 dark:bg-black/90 text-white text-[10px] px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 backdrop-blur-sm">
                                 Awaiting input...
                             </div>
                         </div>
@@ -223,21 +229,23 @@
                     <!-- Emotion badge -->
                     <div class="mt-2.5 flex items-center gap-2">
                         <span id="emotion-badge"
-                            class="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full badge-glow">Neutral</span>
-                        <span id="valence-arousal-text" class="text-[10px] text-slate-400">V: 0.0 · A: 0.0</span>
+                            class="text-[10px] font-medium text-primary bg-primary/10 dark:bg-primary/15 px-2 py-0.5 rounded-full badge-glow">Neutral</span>
+                        <span id="valence-arousal-text" class="text-[10px] text-txt-muted dark:text-txt-muted-dark">V:
+                            0.0 · A: 0.0</span>
                     </div>
                 </div>
 
                 <!-- Cognitive Distortion Card -->
                 <div
-                    class="bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-card border border-slate-200/60 dark:border-slate-700/60 card-hover">
+                    class="bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-card dark:shadow-dark-card border border-bdr/60 dark:border-bdr-dark/60 card-hover transition-colors duration-300">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-[13px]">Cognitive Distortions
-                        </h3>
-                        <span id="distortion-count" class="text-[10px] font-bold text-slate-400">—</span>
+                        <h3 class="font-semibold text-[13px]">Cognitive Distortions</h3>
+                        <span id="distortion-count"
+                            class="text-[10px] font-bold text-txt-muted dark:text-txt-muted-dark">—</span>
                     </div>
                     <div id="distortion-list" class="space-y-2.5">
-                        <div class="text-[11px] text-slate-400 italic flex items-center gap-1.5">
+                        <div
+                            class="text-[11px] text-txt-muted dark:text-txt-muted-dark italic flex items-center gap-1.5">
                             <span class="material-icons text-[13px]">hourglass_empty</span>
                             Awaiting analysis...
                         </div>
@@ -246,31 +254,35 @@
 
                 <!-- Session Insights Card -->
                 <div
-                    class="bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-card border border-slate-200/60 dark:border-slate-700/60 card-hover">
+                    class="bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-card dark:shadow-dark-card border border-bdr/60 dark:border-bdr-dark/60 card-hover transition-colors duration-300">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-[13px]">Session Insights</h3>
+                        <h3 class="font-semibold text-[13px]">Session Insights</h3>
                         <span
-                            class="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">LIVE</span>
+                            class="text-[9px] bg-primary/10 dark:bg-primary/15 text-primary px-1.5 py-0.5 rounded font-medium">LIVE</span>
                     </div>
                     <div class="grid grid-cols-3 gap-3">
                         <div class="text-center">
                             <div id="stat-messages" class="text-lg font-bold text-primary stat-number">0</div>
-                            <div class="text-[9px] text-slate-400 uppercase tracking-wider">Messages</div>
+                            <div class="text-[9px] text-txt-muted dark:text-txt-muted-dark uppercase tracking-wider">
+                                Messages</div>
                         </div>
                         <div class="text-center">
-                            <div id="stat-avg-valence" class="text-lg font-bold text-emerald-500 stat-number">—</div>
-                            <div class="text-[9px] text-slate-400 uppercase tracking-wider">Avg Valence</div>
+                            <div id="stat-avg-valence"
+                                class="text-lg font-bold text-emerald-500 dark:text-emerald-400 stat-number">—</div>
+                            <div class="text-[9px] text-txt-muted dark:text-txt-muted-dark uppercase tracking-wider">Avg
+                                Valence</div>
                         </div>
                         <div class="text-center">
-                            <div id="stat-avg-arousal" class="text-lg font-bold text-amber-500 stat-number">—</div>
-                            <div class="text-[9px] text-slate-400 uppercase tracking-wider">Avg Arousal</div>
+                            <div id="stat-avg-arousal"
+                                class="text-lg font-bold text-amber-500 dark:text-amber-400 stat-number">—</div>
+                            <div class="text-[9px] text-txt-muted dark:text-txt-muted-dark uppercase tracking-wider">Avg
+                                Arousal</div>
                         </div>
                     </div>
-                    <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/50">
+                    <div class="mt-3 pt-3 border-t border-bdr/40 dark:border-bdr-dark/40">
                         <div class="flex items-center gap-1.5">
-                            <span class="text-[10px] text-slate-400">Dominant:</span>
-                            <span id="stat-dominant-emotion"
-                                class="text-[10px] font-medium text-slate-600 dark:text-slate-300">—</span>
+                            <span class="text-[10px] text-txt-muted dark:text-txt-muted-dark">Dominant:</span>
+                            <span id="stat-dominant-emotion" class="text-[10px] font-medium">—</span>
                         </div>
                     </div>
                 </div>
@@ -278,7 +290,7 @@
 
             <!-- Intervention Card (sticky) -->
             <div class="sticky bottom-0 p-4 pt-0">
-                <div class="bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-xl p-3.5 shadow-lg flex items-center gap-3 border border-slate-700/50 relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all"
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-black text-white rounded-xl p-3.5 shadow-lg flex items-center gap-3 border border-slate-700/50 dark:border-slate-600/30 relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all"
                     id="intervention-card">
                     <div
                         class="absolute -right-4 -top-4 w-20 h-20 bg-primary/15 rounded-full blur-2xl group-hover:bg-primary/25 transition-all duration-500">

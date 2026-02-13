@@ -53,8 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let sessionStartTime = Date.now();
     let firstMessageSent = false;
 
-    const ACTIVE_CLASSES = ['bg-white', 'dark:bg-slate-700', 'text-primary', 'shadow-sm', 'border', 'border-slate-200/80', 'dark:border-slate-600'];
-    const INACTIVE_CLASSES = ['text-slate-500', 'hover:text-slate-700', 'dark:text-slate-400', 'dark:hover:text-slate-200'];
+    const ACTIVE_CLASSES = ['bg-surface-light', 'dark:bg-surface-dark', 'text-primary', 'shadow-sm', 'border', 'border-bdr', 'dark:border-bdr-dark'];
+    const INACTIVE_CLASSES = ['text-txt-sub', 'dark:text-txt-sub-dark', 'hover:text-txt', 'dark:hover:text-txt-dark'];
 
     // ========================================
     // 3. Session Timer
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!distortionList) return;
         if (!distortions || distortions.length === 0) {
             distortionList.innerHTML = `
-                <div class="text-[11px] text-slate-400 italic flex items-center gap-1.5">
+                <div class="text-[11px] text-txt-muted dark:text-txt-muted-dark italic flex items-center gap-1.5">
                     <span class="material-icons text-[13px]">check_circle</span>
                     No distortions detected
                 </div>`;
@@ -266,10 +266,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return `
                 <div class="space-y-1 fade-in" style="animation-delay: ${i * 0.08}s">
                     <div class="flex justify-between text-[11px]">
-                        <span class="text-slate-600 dark:text-slate-300 font-medium">${escapeHtml(name)}</span>
+                        <span class="text-txt dark:text-txt-dark font-medium">${escapeHtml(name)}</span>
                         <span style="color: ${color}" class="font-bold text-[10px]">●</span>
                     </div>
-                    <div class="w-full bg-slate-100 dark:bg-slate-700 h-1 rounded-full overflow-hidden">
+                    <div class="w-full bg-panel-light dark:bg-panel-dark h-1 rounded-full overflow-hidden">
                         <div class="h-full rounded-full bar-shine" style="width: ${widthPct}%; background-color: ${color}; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.1}s"></div>
                     </div>
                 </div>`;
@@ -317,9 +317,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="flex justify-end group fade-in">
             <div class="max-w-[80%]">
                 <div class="flex items-center justify-end gap-2 mb-1">
-                    <span class="text-[10px] text-slate-400">${getTimeStr()}</span>
+                    <span class="text-[10px] text-txt-muted dark:text-txt-muted-dark">${getTimeStr()}</span>
                 </div>
-                <div class="bg-primary/10 dark:bg-primary/15 text-slate-800 dark:text-slate-100 px-4 py-3 rounded-2xl rounded-tr-sm">
+                <div class="bg-primary/10 dark:bg-primary/15 text-txt dark:text-txt-dark px-4 py-3 rounded-2xl rounded-tr-sm">
                     <p class="leading-relaxed text-[13px] whitespace-pre-wrap">${escapeHtml(text)}</p>
                 </div>
             </div>
@@ -333,11 +333,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const thinkingLog = data.internal_thinking ? `
             <details class="mb-2.5">
-                <summary class="cursor-pointer text-[10px] text-slate-400 hover:text-primary transition-colors list-none flex items-center gap-1">
+                <summary class="cursor-pointer text-[10px] text-txt-muted dark:text-txt-muted-dark hover:text-primary transition-colors list-none flex items-center gap-1">
                     <span class="material-icons text-[11px]">psychology</span>
                     View reasoning process
                 </summary>
-                <div class="mt-2 text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-black/20 p-3 rounded-lg border-l-2 border-primary/40 overflow-x-auto whitespace-pre-wrap max-h-48 overflow-y-auto scrollbar-thin">${escapeHtml(data.internal_thinking)}</div>
+                <div class="mt-2 text-[11px] font-mono text-txt-sub dark:text-txt-sub-dark bg-panel-light dark:bg-panel-dark p-3 rounded-lg border-l-2 border-primary/40 overflow-x-auto whitespace-pre-wrap max-h-48 overflow-y-auto scrollbar-thin">${escapeHtml(data.internal_thinking)}</div>
             </details>` : '';
 
         const verificationBlock = data.verification_data ? `
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="material-icons text-[11px]">manage_search</span>
                     Evidence & sources
                 </summary>
-                <div class="mt-2 text-[11px] text-slate-600 dark:text-slate-300 bg-amber-50 dark:bg-amber-900/15 p-3 rounded-lg border-l-2 border-amber-400/60 whitespace-pre-wrap">${escapeHtml(data.verification_data)}</div>
+                <div class="mt-2 text-[11px] text-txt-sub dark:text-txt-sub-dark bg-amber-50 dark:bg-amber-900/15 p-3 rounded-lg border-l-2 border-amber-400/60 whitespace-pre-wrap">${escapeHtml(data.verification_data)}</div>
             </details>` : '';
 
         const html = `
@@ -354,11 +354,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="max-w-[85%]">
                 <div class="flex items-center gap-1.5 mb-1">
                     <div class="w-5 h-5 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white text-[9px] font-bold shadow-sm">AI</div>
-                    <span class="text-[10px] text-slate-400">${getTimeStr()}</span>
-                    <span class="text-[9px] font-medium text-primary/80 bg-primary/8 px-1.5 py-0.5 rounded">${emotionTag}</span>
-                    <span class="text-[9px] text-slate-400 flex items-center gap-0.5"><span class="material-icons text-[9px]">${modeLabelIcon}</span>${currentMode}</span>
+                    <span class="text-[10px] text-txt-muted dark:text-txt-muted-dark">${getTimeStr()}</span>
+                    <span class="text-[9px] font-medium text-primary/80 bg-primary/8 dark:bg-primary/12 px-1.5 py-0.5 rounded">${emotionTag}</span>
+                    <span class="text-[9px] text-txt-muted dark:text-txt-muted-dark flex items-center gap-0.5"><span class="material-icons text-[9px]">${modeLabelIcon}</span>${currentMode}</span>
                 </div>
-                <div class="bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 px-4 py-3 rounded-2xl rounded-tl-sm border border-slate-100 dark:border-slate-700/60 shadow-sm">
+                <div class="bg-panel-light dark:bg-surface-dark text-txt dark:text-txt-dark px-4 py-3 rounded-2xl rounded-tl-sm border border-bdr/60 dark:border-bdr-dark/60 shadow-card dark:shadow-dark-card">
                     ${thinkingLog}
                     <p class="leading-relaxed text-[13px]">${markdownToHtml(data.response)}</p>
                     ${verificationBlock}

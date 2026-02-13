@@ -52,7 +52,8 @@
 }
 
 .dark .glass {
-    background: rgba(21, 40, 42, 0.8);
+    background: rgba(14, 27, 29, 0.85);
+    border-color: rgba(30, 53, 56, 0.6);
 }
 
 /* --- Fade In Animation --- */
