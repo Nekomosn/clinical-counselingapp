@@ -14,16 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const welcomeScreen = document.getElementById('welcome-screen');
     const charCount = document.getElementById('char-count');
 
-    // Theme
     const themeToggleBtn = document.getElementById('theme-toggle');
     const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
     const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
 
-    // Mode
     const modeAcceptanceBtn = document.getElementById('mode-acceptance');
     const modeStrategyBtn = document.getElementById('mode-strategy');
 
-    // Analysis Panels
     const emotionDot = document.getElementById('emotion-dot-container');
     const emotionTooltip = document.getElementById('emotion-tooltip');
     const emotionBadge = document.getElementById('emotion-badge');
@@ -32,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const distortionList = document.getElementById('distortion-list');
     const distortionCount = document.getElementById('distortion-count');
 
-    // Session Stats
     const sessionTimerEl = document.getElementById('session-timer');
     const msgCounterEl = document.getElementById('message-counter');
     const statMessages = document.getElementById('stat-messages');
@@ -40,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const statAvgArousal = document.getElementById('stat-avg-arousal');
     const statDominantEmotion = document.getElementById('stat-dominant-emotion');
 
-    // Export/Import
     const btnExportJson = document.getElementById('btn-export-json');
     const fileInputImport = document.getElementById('file-input-import');
 
@@ -49,12 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ========================================
     let currentMode = "Acceptance";
     let chatHistory = [];
-    let emotionTrailHistory = []; // {left%, top%, emotion}
+    let emotionTrailHistory = [];
     let sessionStartTime = Date.now();
     let firstMessageSent = false;
 
-    const ACTIVE_CLASSES = ['bg-surface-light', 'dark:bg-surface-dark', 'text-primary', 'shadow-sm', 'border', 'border-bdr', 'dark:border-bdr-dark'];
-    const INACTIVE_CLASSES = ['text-txt-sub', 'dark:text-txt-sub-dark', 'hover:text-txt', 'dark:hover:text-txt-dark'];
+    // Light: white bg + slate border. Dark: bg-panel + slate-700 border
+    const ACTIVE_CLASSES = ['bg-white', 'dark:bg-bg-panel', 'text-primary', 'shadow-sm', 'border', 'border-slate-200', 'dark:border-slate-700'];
+    const INACTIVE_CLASSES = ['text-slate-500', 'dark:text-slate-500', 'hover:text-slate-700', 'dark:hover:text-slate-300'];
 
     // ========================================
     // 3. Session Timer
@@ -198,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!enabled) {
             sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
             inputField.classList.add('opacity-60');
-            inputField.placeholder = "Analyzing cognitive patterns...";
+            inputField.placeholder = "Analyzing cognitive schemas...";
         } else {
             sendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             inputField.classList.remove('opacity-60');
@@ -215,27 +211,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const clampedLeft = Math.max(5, Math.min(95, leftPct));
         const clampedTop = Math.max(5, Math.min(95, topPct));
 
-        // Add ghost dot for trail (previous position)
+        // Add ghost dot for trail
         if (emotionTrail && emotionTrailHistory.length > 0) {
             const prev = emotionTrailHistory[emotionTrailHistory.length - 1];
             const ghost = document.createElement('div');
             ghost.className = 'ghost-dot';
             ghost.style.left = prev.left;
             ghost.style.top = prev.top;
-            // Older dots fade more
             const age = emotionTrailHistory.length;
-            ghost.style.opacity = Math.max(0.1, 0.5 - (age * 0.05));
-            ghost.style.width = `${Math.max(3, 6 - age)}px`;
+            ghost.style.opacity = Math.max(0.15, 0.5 - (age * 0.06));
+            ghost.style.width = `${Math.max(4, 8 - age)}px`;
             ghost.style.height = ghost.style.width;
             emotionTrail.appendChild(ghost);
         }
 
-        // Move active dot
         if (emotionDot) {
             emotionDot.style.left = `${clampedLeft}%`;
             emotionDot.style.top = `${clampedTop}%`;
         }
-        if (emotionTooltip) emotionTooltip.textContent = `${emotion} (V:${valence.toFixed(1)}, A:${arousal.toFixed(1)})`;
+        if (emotionTooltip) emotionTooltip.textContent = `Current State: ${emotion} (V:${valence.toFixed(1)}, A:${arousal.toFixed(1)})`;
         if (emotionBadge) emotionBadge.textContent = emotion || 'Neutral';
         if (valenceArousalText) valenceArousalText.textContent = `V: ${valence.toFixed(2)} · A: ${arousal.toFixed(2)}`;
 
@@ -249,8 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!distortionList) return;
         if (!distortions || distortions.length === 0) {
             distortionList.innerHTML = `
-                <div class="text-[11px] text-txt-muted dark:text-txt-muted-dark italic flex items-center gap-1.5">
-                    <span class="material-icons text-[13px]">check_circle</span>
+                <div class="text-xs text-slate-400 dark:text-slate-500 italic flex items-center gap-1.5">
+                    <span class="material-icons text-[14px]">check_circle</span>
                     No distortions detected
                 </div>`;
             if (distortionCount) distortionCount.textContent = '0';
@@ -262,14 +256,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const html = distortions.map((name, i) => {
             const color = colors[i % colors.length];
-            const widthPct = Math.max(25, 95 - (i * 14));
+            const widthPct = Math.max(20, 90 - (i * 15));
             return `
                 <div class="space-y-1 fade-in" style="animation-delay: ${i * 0.08}s">
-                    <div class="flex justify-between text-[11px]">
-                        <span class="text-txt dark:text-txt-dark font-medium">${escapeHtml(name)}</span>
-                        <span style="color: ${color}" class="font-bold text-[10px]">●</span>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-600 dark:text-slate-400 font-medium">${escapeHtml(name)}</span>
+                        <span style="color: ${color}" class="font-bold">${widthPct}%</span>
                     </div>
-                    <div class="w-full bg-panel-light dark:bg-panel-dark h-1 rounded-full overflow-hidden">
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
                         <div class="h-full rounded-full bar-shine" style="width: ${widthPct}%; background-color: ${color}; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.1}s"></div>
                     </div>
                 </div>`;
@@ -292,7 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (statAvgValence) statAvgValence.textContent = avgV.toFixed(2);
             if (statAvgArousal) statAvgArousal.textContent = avgA.toFixed(2);
 
-            // Dominant emotion (most frequent)
             const emotionFreq = {};
             aiMsgs.forEach(m => {
                 const e = m.meta.primary_emotion || 'neutral';
@@ -317,10 +310,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="flex justify-end group fade-in">
             <div class="max-w-[80%]">
                 <div class="flex items-center justify-end gap-2 mb-1">
-                    <span class="text-[10px] text-txt-muted dark:text-txt-muted-dark">${getTimeStr()}</span>
+                    <span class="text-xs text-slate-400 dark:text-slate-500">${getTimeStr()}</span>
                 </div>
-                <div class="bg-primary/10 dark:bg-primary/15 text-txt dark:text-txt-dark px-4 py-3 rounded-2xl rounded-tr-sm">
-                    <p class="leading-relaxed text-[13px] whitespace-pre-wrap">${escapeHtml(text)}</p>
+                <div class="bg-primary/10 dark:bg-primary/10 text-slate-800 dark:text-slate-100 p-4 rounded-2xl rounded-tr-sm dark:border dark:border-primary/20">
+                    <p class="leading-relaxed whitespace-pre-wrap">${escapeHtml(text)}</p>
                 </div>
             </div>
         </div>`;
@@ -332,35 +325,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const modeLabelIcon = currentMode === 'Acceptance' ? 'favorite' : 'bolt';
 
         const thinkingLog = data.internal_thinking ? `
-            <details class="mb-2.5">
-                <summary class="cursor-pointer text-[10px] text-txt-muted dark:text-txt-muted-dark hover:text-primary transition-colors list-none flex items-center gap-1">
-                    <span class="material-icons text-[11px]">psychology</span>
+            <details class="mb-3">
+                <summary class="cursor-pointer text-[10px] text-slate-400 dark:text-slate-500 hover:text-primary transition-colors list-none flex items-center gap-1">
+                    <span class="material-icons text-[12px]">psychology</span>
                     View reasoning process
                 </summary>
-                <div class="mt-2 text-[11px] font-mono text-txt-sub dark:text-txt-sub-dark bg-panel-light dark:bg-panel-dark p-3 rounded-lg border-l-2 border-primary/40 overflow-x-auto whitespace-pre-wrap max-h-48 overflow-y-auto scrollbar-thin">${escapeHtml(data.internal_thinking)}</div>
+                <div class="mt-2 text-xs font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900 p-3 rounded-lg border-l-2 border-primary/40 overflow-x-auto whitespace-pre-wrap max-h-48 overflow-y-auto scrollbar-thin">${escapeHtml(data.internal_thinking)}</div>
             </details>` : '';
 
         const verificationBlock = data.verification_data ? `
-            <details class="mt-2.5">
+            <details class="mt-3">
                 <summary class="cursor-pointer text-[10px] text-amber-500 dark:text-amber-400 hover:text-amber-600 transition-colors list-none flex items-center gap-1">
-                    <span class="material-icons text-[11px]">manage_search</span>
+                    <span class="material-icons text-[12px]">manage_search</span>
                     Evidence & sources
                 </summary>
-                <div class="mt-2 text-[11px] text-txt-sub dark:text-txt-sub-dark bg-amber-50 dark:bg-amber-900/15 p-3 rounded-lg border-l-2 border-amber-400/60 whitespace-pre-wrap">${escapeHtml(data.verification_data)}</div>
+                <div class="mt-2 text-xs text-slate-600 dark:text-slate-300 bg-amber-50 dark:bg-amber-900/15 p-3 rounded-lg border-l-2 border-amber-400/60 whitespace-pre-wrap">${escapeHtml(data.verification_data)}</div>
             </details>` : '';
 
         const html = `
         <div class="flex justify-start fade-in">
             <div class="max-w-[85%]">
-                <div class="flex items-center gap-1.5 mb-1">
-                    <div class="w-5 h-5 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white text-[9px] font-bold shadow-sm">AI</div>
-                    <span class="text-[10px] text-txt-muted dark:text-txt-muted-dark">${getTimeStr()}</span>
-                    <span class="text-[9px] font-medium text-primary/80 bg-primary/8 dark:bg-primary/12 px-1.5 py-0.5 rounded">${emotionTag}</span>
-                    <span class="text-[9px] text-txt-muted dark:text-txt-muted-dark flex items-center gap-0.5"><span class="material-icons text-[9px]">${modeLabelIcon}</span>${currentMode}</span>
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-white dark:text-slate-900 text-[10px] font-bold">AI</div>
+                    <span class="text-xs text-slate-400 dark:text-slate-500">Assistant</span>
+                    <span class="text-[10px] uppercase tracking-wider text-primary border border-primary/30 px-1.5 py-0.5 rounded bg-primary/5">${emotionTag}</span>
+                    <span class="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded bg-slate-50 dark:bg-slate-800/50">Mode: ${currentMode}</span>
                 </div>
-                <div class="bg-panel-light dark:bg-surface-dark text-txt dark:text-txt-dark px-4 py-3 rounded-2xl rounded-tl-sm border border-bdr/60 dark:border-bdr-dark/60 shadow-card dark:shadow-dark-card">
+                <div class="bg-slate-50 dark:bg-bg-panel text-slate-700 dark:text-slate-200 p-4 rounded-2xl rounded-tl-sm border border-slate-100 dark:border-slate-700 shadow-sm dark:shadow-card-dk">
                     ${thinkingLog}
-                    <p class="leading-relaxed text-[13px]">${markdownToHtml(data.response)}</p>
+                    <p class="leading-relaxed">${markdownToHtml(data.response)}</p>
                     ${verificationBlock}
                 </div>
             </div>
@@ -372,8 +365,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function appendErrorMessage(msg) {
         const html = `
         <div class="flex justify-center my-3 fade-in">
-            <span class="text-[11px] text-red-500 bg-red-50 dark:bg-red-900/15 px-3 py-1.5 rounded-full border border-red-100 dark:border-red-800/60 flex items-center gap-1">
-                <span class="material-icons text-[12px]">error_outline</span>
+            <span class="text-xs text-red-500 bg-red-50 dark:bg-red-900/15 px-3 py-1.5 rounded-full border border-red-100 dark:border-red-800/60 flex items-center gap-1">
+                <span class="material-icons text-[14px]">error_outline</span>
                 ${escapeHtml(msg)}
             </span>
         </div>`;
@@ -411,14 +404,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = JSON.parse(event.target.result);
                     chatHistory = data.history || [];
 
-                    // Remove welcome screen
                     if (welcomeScreen) welcomeScreen.remove();
                     firstMessageSent = true;
 
-                    // Clear and rebuild chat
                     chatContainer.innerHTML = '';
-                    chatContainer.innerHTML = `<div class="flex justify-center my-3"><span class="text-[10px] text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-800/60 flex items-center gap-1"><span class="material-icons text-[11px]">restore</span>Session restored</span></div>`;
-                    // Re-append processing indicator
+                    chatContainer.innerHTML = `<div class="flex justify-center"><span class="text-xs text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-800/50 flex items-center gap-1"><span class="material-icons text-[14px]">restore</span>Session restored</span></div>`;
                     chatContainer.appendChild(processingIndicator);
 
                     chatHistory.forEach(msg => {
@@ -430,7 +420,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
 
-                    // Restore last state
                     const lastAI = chatHistory.filter(m => m.role === 'assistant').pop();
                     if (lastAI && lastAI.meta) {
                         updateEmotionMap(lastAI.meta.valence, lastAI.meta.arousal, lastAI.meta.primary_emotion);
