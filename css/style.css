@@ -1,5 +1,101 @@
 /* ============================================
    MindSight Clinical AI — Design System
+   ============================================
+   ★ COLOR SYSTEM — 全カラー定義はここ ★
+   ライト/ダークモードの色を調整する場合は
+   このセクションだけを編集してください。
+   ============================================ */
+
+:root {
+    /* ── ブランドカラー ────────────────────────
+       RGB形式（Tailwindの透過指定に対応するため）
+       例: bg-primary/10 → rgba(19,218,236,0.1) */
+    --c-primary: 19, 218, 236;
+    /* #13daec — メインの水色 */
+    --c-primary-dark: 14, 166, 180;
+    /* #0ea6b4 — ホバー時の水色 */
+
+    /* ── ライトモード背景 ──────────────────── */
+    --c-bg-main: #f6f8f8;
+    /* ページ全体の背景 */
+    --c-bg-surface: #ffffff;
+    /* ヘッダー・チャット・カード背景 */
+    --c-bg-panel: #eff4f5;
+    /* 右パネル背景 */
+    --c-bg-input: #f8fafc;
+    /* 入力欄・チャートエリア背景 (slate-50) */
+
+    /* ── ライトモード テキスト ─────────────── */
+    --c-text-heading: #1e293b;
+    /* 見出し (slate-800) */
+    --c-text-body: #334155;
+    /* 本文 (slate-700) */
+    --c-text-sub: #64748b;
+    /* 補足テキスト (slate-500) */
+    --c-text-muted: #94a3b8;
+    /* 薄いテキスト (slate-400) */
+
+    /* ── ライトモード ボーダー ─────────────── */
+    --c-border: #e2e8f0;
+    /* 標準ボーダー (slate-200) */
+    --c-border-light: #f1f5f9;
+    /* 薄いボーダー (slate-100) */
+
+    /* ── ライトモード チャート ─────────────── */
+    --c-chart-grid: #cbd5e1;
+    /* チャートのドット色 */
+    --c-chart-axis: #cbd5e1;
+    /* チャート軸 (slate-300) */
+    --c-ghost-dot: rgba(203, 213, 225, 0.6);
+    /* ゴーストドット */
+
+    /* ── ライトモード シャドウ ─────────────── */
+    --c-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --c-shadow-soft: 0 4px 20px -2px rgba(19, 218, 236, 0.05);
+}
+
+.dark {
+    /* ── ダークモード背景 ──────────────────── */
+    --c-bg-main: #0b1219;
+    /* ページ全体 (Deep Indigo) */
+    --c-bg-surface: #141e29;
+    /* ヘッダー・チャット・カード背景 */
+    --c-bg-panel: #1b2a38;
+    /* パネル・入力欄背景 */
+    --c-bg-input: #1b2a38;
+    /* 入力欄背景 */
+
+    /* ── ダークモード テキスト ─────────────── */
+    --c-text-heading: #f1f5f9;
+    /* 見出し (slate-100) */
+    --c-text-body: #e2e8f0;
+    /* 本文 (slate-200) */
+    --c-text-sub: #94a3b8;
+    /* 補足テキスト (slate-400) */
+    --c-text-muted: #64748b;
+    /* 薄いテキスト (slate-500) */
+
+    /* ── ダークモード ボーダー ─────────────── */
+    --c-border: #1e293b;
+    /* 標準ボーダー (slate-800) */
+    --c-border-light: #334155;
+    /* 薄いボーダー (slate-700) */
+
+    /* ── ダークモード チャート ─────────────── */
+    --c-chart-grid: rgba(148, 163, 184, 0.15);
+    --c-chart-axis: #334155;
+    /* (slate-700) */
+    --c-ghost-dot: rgba(71, 85, 105, 0.5);
+
+    /* ── ダークモード シャドウ ─────────────── */
+    --c-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --c-shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+}
+
+
+/* ============================================
+   以下はアニメーション・レイアウトユーティリティ
+   通常は編集不要です。
    ============================================ */
 
 /* --- Scrollbar --- */
@@ -21,27 +117,19 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.2);
+    background: var(--c-ghost-dot);
     border-radius: 999px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: rgba(148, 163, 184, 0.35);
 }
 
 .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+    scrollbar-color: var(--c-ghost-dot) transparent;
 }
 
 /* --- Chart Grid --- */
 .chart-grid {
-    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+    background-image: radial-gradient(var(--c-chart-grid) 1px, transparent 1px);
     background-size: 20px 20px;
-}
-
-.dark .chart-grid {
-    background-image: radial-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px);
 }
 
 /* --- Fade In --- */
@@ -72,7 +160,7 @@
     }
 }
 
-/* --- Typing Indicator (3-dot bounce) --- */
+/* --- Typing Indicator --- */
 .typing-dots {
     display: flex;
     align-items: center;
@@ -85,7 +173,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #13daec;
+    background: rgb(var(--c-primary));
     animation: typingBounce 1.4s infinite ease-in-out both;
 }
 
@@ -122,7 +210,7 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    border: 1.5px solid rgba(19, 218, 236, 0.35);
+    border: 1.5px solid rgb(var(--c-primary) / 0.35);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -141,28 +229,18 @@
     }
 }
 
-/* --- Ghost Dot (Emotion Trail) --- */
+/* --- Ghost Dot --- */
 .ghost-dot {
     position: absolute;
-    width: 6px;
-    height: 6px;
     border-radius: 50%;
+    background: var(--c-ghost-dot);
     transition: all 0.5s ease;
     pointer-events: none;
 }
 
-/* Light: slate grey ghosts, Dark: slate muted ghosts */
-.ghost-dot {
-    background: rgba(203, 213, 225, 0.6);
-}
-
-.dark .ghost-dot {
-    background: rgba(71, 85, 105, 0.5);
-}
-
 /* --- Input Focus Glow --- */
 .input-glow:focus {
-    box-shadow: 0 0 0 3px rgba(19, 218, 236, 0.12);
+    box-shadow: 0 0 0 3px rgb(var(--c-primary) / 0.12);
 }
 
 /* --- Card Hover --- */
@@ -202,23 +280,20 @@
     }
 }
 
-/* --- Stat Number --- */
+/* --- Misc --- */
 .stat-number {
     font-variant-numeric: tabular-nums;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.4s ease;
 }
 
-/* --- Badge Glow (light) --- */
 .badge-glow {
-    box-shadow: 0 0 8px rgba(19, 218, 236, 0.1);
+    box-shadow: 0 0 8px rgb(var(--c-primary) / 0.1);
 }
 
-/* --- Mode Pill --- */
 .mode-pill {
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* --- Welcome Grid --- */
 .welcome-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

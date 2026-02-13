@@ -11,20 +11,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
 
+    <!-- CSS variables + animations -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- Tailwind config (reads CSS variables) -->
     <script src="js/tailwind.config.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 </head>
 
+<!--
+  カラー設計:
+  - 背景色クラス: bg-background-light = ページ全体, bg-slate-calm = 右パネル
+  - dark時は CSS変数が自動切替するため dark: 付きの背景色も用意
+  - テキスト/ボーダーは標準 Tailwind slate を使用（dark: で切替）
+-->
+
 <body
-    class="bg-background-light dark:bg-bg-deep text-slate-800 dark:text-slate-200 font-display h-screen flex flex-col overflow-hidden">
+    class="bg-background-light dark:bg-bg-deep text-slate-800 dark:text-slate-200 font-display h-screen flex flex-col overflow-hidden transition-colors duration-300">
 
     <!-- ===== HEADER ===== -->
     <header
-        class="h-16 bg-white dark:bg-bg-surface border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 shrink-0 z-20">
+        class="h-16 bg-white dark:bg-bg-surface border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 shrink-0 z-20 transition-colors duration-300">
         <!-- Left: Brand + Session -->
         <div class="flex items-center gap-4">
             <div class="flex items-center gap-2">
@@ -88,7 +95,7 @@
 
         <!-- === LEFT: Chat Panel === -->
         <section
-            class="w-full lg:w-7/12 flex flex-col bg-white dark:bg-bg-surface border-r border-slate-200 dark:border-slate-800 relative">
+            class="w-full lg:w-7/12 flex flex-col bg-white dark:bg-bg-surface border-r border-slate-200 dark:border-slate-800 relative transition-colors duration-300">
 
             <!-- Chat Messages -->
             <div class="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-thin" id="chat-container">
@@ -136,7 +143,7 @@
                                 schemas...</span>
                         </div>
                         <div
-                            class="bg-slate-50 dark:bg-bg-panel rounded-2xl rounded-tl-sm border border-slate-100 dark:border-slate-700 shadow-sm dark:shadow-card-dk">
+                            class="bg-slate-50 dark:bg-bg-panel rounded-2xl rounded-tl-sm border border-slate-100 dark:border-slate-700 shadow-card">
                             <div class="typing-dots">
                                 <span></span><span></span><span></span>
                             </div>
@@ -147,10 +154,10 @@
 
             <!-- Input Area -->
             <div
-                class="p-6 bg-white dark:bg-bg-surface border-t border-slate-100 dark:border-slate-800 shrink-0 input-area">
+                class="p-6 bg-white dark:bg-bg-surface border-t border-slate-100 dark:border-slate-800 shrink-0 input-area transition-colors duration-300">
                 <div class="relative">
                     <textarea id="user-input"
-                        class="input-glow w-full bg-slate-50 dark:bg-bg-panel border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 pr-24 text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none h-24 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+                        class="input-glow w-full bg-slate-50 dark:bg-bg-panel border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 pr-24 text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none h-24 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-300"
                         placeholder="Type your thoughts here... (Shift+Enter for new line)"></textarea>
                     <div class="absolute bottom-3 right-3 flex items-center gap-2">
                         <span id="char-count"
@@ -171,7 +178,7 @@
 
         <!-- === RIGHT: Analysis Panel === -->
         <section
-            class="hidden lg:flex w-5/12 flex-col bg-slate-calm dark:bg-bg-deep overflow-y-auto scrollbar-thin right-panel">
+            class="hidden lg:flex w-5/12 flex-col bg-slate-calm dark:bg-bg-deep overflow-y-auto scrollbar-thin right-panel transition-colors duration-300">
 
             <div class="p-6 space-y-6 flex-1">
                 <h2 class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">
@@ -179,7 +186,7 @@
 
                 <!-- Emotion Mapping Card -->
                 <div
-                    class="bg-white dark:bg-bg-surface rounded-xl p-5 shadow-card dark:shadow-card-dk border border-slate-200/60 dark:border-slate-800 card-hover">
+                    class="bg-white dark:bg-bg-surface rounded-xl p-5 shadow-card border border-slate-200/60 dark:border-slate-800 card-hover transition-colors duration-300">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-sm">Emotion Mapping</h3>
                         <span
@@ -210,7 +217,7 @@
                             style="transform: translate(-50%, -50%)">
                             <div class="emotion-dot-ring"></div>
                             <div
-                                class="w-3 h-3 bg-primary rounded-full shadow-[0_0_15px_rgba(19,218,236,0.6)] dark:shadow-[0_0_15px_rgba(19,218,236,0.8)] relative z-10">
+                                class="w-3 h-3 bg-primary rounded-full shadow-[0_0_15px_rgba(19,218,236,0.6)] relative z-10">
                             </div>
                             <div id="emotion-tooltip"
                                 class="absolute bottom-5 left-1/2 -translate-x-1/2 bg-slate-800 dark:bg-slate-900 text-white text-[10px] px-2 py-1 rounded dark:border dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
@@ -229,7 +236,7 @@
 
                 <!-- Cognitive Distortion Card -->
                 <div
-                    class="bg-white dark:bg-bg-surface rounded-xl p-5 shadow-card dark:shadow-card-dk border border-slate-200/60 dark:border-slate-800 card-hover">
+                    class="bg-white dark:bg-bg-surface rounded-xl p-5 shadow-card border border-slate-200/60 dark:border-slate-800 card-hover transition-colors duration-300">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-sm">Cognitive Distortion
                             Patterns</h3>
@@ -246,7 +253,7 @@
 
                 <!-- Session Insights Card -->
                 <div
-                    class="bg-white dark:bg-bg-surface rounded-xl p-5 shadow-card dark:shadow-card-dk border border-slate-200/60 dark:border-slate-800 card-hover">
+                    class="bg-white dark:bg-bg-surface rounded-xl p-5 shadow-card border border-slate-200/60 dark:border-slate-800 card-hover transition-colors duration-300">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-sm">Session Insights</h3>
                         <span
@@ -280,7 +287,7 @@
                 </div>
             </div>
 
-            <!-- Intervention Card (sticky) -->
+            <!-- Intervention Card -->
             <div class="sticky bottom-0 p-6 pt-2">
                 <div class="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-bg-panel text-white rounded-xl p-4 shadow-lg flex items-center gap-4 border border-slate-700/50 dark:border-slate-800 relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all"
                     id="intervention-card">

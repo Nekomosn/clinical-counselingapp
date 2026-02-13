@@ -1,20 +1,24 @@
 // js/tailwind.config.js
+// カラー定義は css/style.css の先頭にあります。
+// ここでは CSS変数 を参照しているだけです。
+
 tailwind.config = {
     darkMode: "class",
     theme: {
         extend: {
             colors: {
-                "primary": "#13daec",
-                "primary-dark": "#0ea6b4",
+                // ブランドカラー（RGB変数 → 透過対応）
+                "primary": "rgb(var(--c-primary) / <alpha-value>)",
+                "primary-dark": "rgb(var(--c-primary-dark) / <alpha-value>)",
 
-                // Light mode
-                "background-light": "#f6f8f8",
-                "slate-calm": "#eff4f5",
+                // ライトモード背景
+                "background-light": "var(--c-bg-main)",
+                "slate-calm": "var(--c-bg-panel)",  // 右パネル背景
 
-                // Dark mode (Indigo/Slate family)
-                "bg-deep": "#0b1219",
-                "bg-surface": "#141e29",
-                "bg-panel": "#1b2a38",
+                // ダークモード背景（dark: プレフィックスで使用）
+                "bg-deep": "var(--c-bg-main)",
+                "bg-surface": "var(--c-bg-surface)",
+                "bg-panel": "var(--c-bg-panel)",
             },
             fontFamily: {
                 "display": ["Inter", "sans-serif"]
@@ -26,13 +30,10 @@ tailwind.config = {
                 "full": "9999px"
             },
             boxShadow: {
-                'soft': '0 4px 20px -2px rgba(19, 218, 236, 0.05)',
-                'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                'card-dk': '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
+                'soft': 'var(--c-shadow-soft)',
+                'card': 'var(--c-shadow-card)',
+                'card-dk': 'var(--c-shadow-card)',  // 同じ変数（dark時に自動切替）
             },
-            animation: {
-                'spin-slow': 'spin 8s linear infinite',
-            }
         },
     },
 }
