@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         </div>`;
-        chatContainer.insertAdjacentHTML('beforeend', html);
+        processingIndicator.insertAdjacentHTML('beforebegin', html);
     }
 
     function appendAIMessage(data) {
@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${escapeHtml(msg)}
             </span>
         </div>`;
-        chatContainer.insertAdjacentHTML('beforeend', html);
+        processingIndicator.insertAdjacentHTML('beforebegin', html);
     }
 
     // ========================================
