@@ -16,11 +16,11 @@
     /* #0ea6b4 — ホバー時の水色 */
 
     /* ── ライトモード背景 ──────────────────── */
-    --c-bg-main: #f6f8f8;
+    --c-bg-main: lab(93.9% -5.46 -4.07 / 0.966);
     /* ページ全体の背景 */
-    --c-bg-surface: #ffffff;
+    --c-bg-surface: #ffffffc5;
     /* ヘッダー・チャット・カード背景 */
-    --c-bg-panel: #eff4f5;
+    --c-bg-panel: #eff4f5be;
     /* 右パネル背景 */
     --c-bg-input: #f8fafc;
     /* 入力欄・チャートエリア背景 (slate-50) */
@@ -36,7 +36,7 @@
     /* 薄いテキスト (slate-400) */
 
     /* ── ライトモード ボーダー ─────────────── */
-    --c-border: #e2e8f0;
+    --c-border: #e2e8f0b7;
     /* 標準ボーダー (slate-200) */
     --c-border-light: #f1f5f9;
     /* 薄いボーダー (slate-100) */
@@ -44,7 +44,7 @@
     /* ── ライトモード チャート ─────────────── */
     --c-chart-grid: #cbd5e1;
     /* チャートのドット色 */
-    --c-chart-axis: #cbd5e1;
+    --c-chart-axis: #cbd5e1cc;
     /* チャート軸 (slate-300) */
     --c-ghost-dot: rgba(203, 213, 225, 0.6);
     /* ゴーストドット */

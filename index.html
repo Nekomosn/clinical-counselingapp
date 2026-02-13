@@ -14,9 +14,10 @@
 
     <!-- CSS variables + animations -->
     <link rel="stylesheet" href="css/style.css">
-    <!-- Tailwind config (reads CSS variables) -->
-    <script src="js/tailwind.config.js"></script>
+    <!-- Tailwind CDN must load FIRST (creates `tailwind` global) -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Config runs AFTER CDN (sets tailwind.config) -->
+    <script src="js/tailwind.config.js"></script>
 </head>
 
 <!--
