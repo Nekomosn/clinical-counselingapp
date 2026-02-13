@@ -18,8 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
     const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
 
-    const modeAcceptanceBtn = document.getElementById('mode-acceptance');
-    const modeStrategyBtn = document.getElementById('mode-strategy');
+    const langToggleBtn = document.getElementById('lang-toggle');
 
     const emotionDot = document.getElementById('emotion-dot-container');
     const emotionTooltip = document.getElementById('emotion-tooltip');
@@ -42,15 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // ========================================
     // 2. State
     // ========================================
-    let currentMode = "Acceptance";
+    const currentMode = "Acceptance"; // Fixed mode
+    let currentLang = 'jp';  // 'jp' or 'en'
     let chatHistory = [];
     let emotionTrailHistory = [];
     let sessionStartTime = Date.now();
     let firstMessageSent = false;
-
-    // Light: white bg + slate border. Dark: bg-panel + slate-700 border
-    const ACTIVE_CLASSES = ['bg-white', 'dark:bg-bg-panel', 'text-primary', 'shadow-sm', 'border', 'border-slate-200', 'dark:border-slate-700'];
-    const INACTIVE_CLASSES = ['text-slate-500', 'dark:text-slate-500', 'hover:text-slate-700', 'dark:hover:text-slate-300'];
 
     // ========================================
     // 3. Session Timer
@@ -96,24 +92,23 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
 
     // ========================================
-    // 5. Mode Toggle
+    // 5. Language Toggle (JP/EN)
     // ========================================
-    function setMode(mode) {
-        currentMode = mode;
-        if (!modeAcceptanceBtn || !modeStrategyBtn) return;
-
-        const [activeBtn, inactiveBtn] = mode === "Acceptance"
-            ? [modeAcceptanceBtn, modeStrategyBtn]
-            : [modeStrategyBtn, modeAcceptanceBtn];
-
-        INACTIVE_CLASSES.forEach(c => activeBtn.classList.remove(c));
-        ACTIVE_CLASSES.forEach(c => activeBtn.classList.add(c));
-        ACTIVE_CLASSES.forEach(c => inactiveBtn.classList.remove(c));
-        INACTIVE_CLASSES.forEach(c => inactiveBtn.classList.add(c));
+    function setLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll('[data-jp][data-en]').forEach(el => {
+            el.textContent = el.getAttribute(`data-${lang}`);
+        });
+        if (langToggleBtn) {
+            langToggleBtn.textContent = lang === 'jp' ? 'EN' : 'JP';
+        }
     }
 
-    if (modeAcceptanceBtn) modeAcceptanceBtn.addEventListener('click', () => setMode("Acceptance"));
-    if (modeStrategyBtn) modeStrategyBtn.addEventListener('click', () => setMode("Strategy"));
+    if (langToggleBtn) {
+        langToggleBtn.addEventListener('click', () => {
+            setLang(currentLang === 'jp' ? 'en' : 'jp');
+        });
+    }
 
     // ========================================
     // 6. Character Count
@@ -322,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function appendAIMessage(data) {
         const emotionTag = escapeHtml(data.primary_emotion || 'neutral');
-        const modeLabelIcon = currentMode === 'Acceptance' ? 'favorite' : 'bolt';
+
 
         const thinkingLog = data.internal_thinking ? `
             <details class="mb-3">
@@ -349,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-white dark:text-slate-900 text-[10px] font-bold">AI</div>
                     <span class="text-xs text-slate-400 dark:text-slate-500">Assistant</span>
                     <span class="text-[10px] uppercase tracking-wider text-primary border border-primary/30 px-1.5 py-0.5 rounded bg-primary/5">${emotionTag}</span>
-                    <span class="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded bg-slate-50 dark:bg-slate-800/50">Mode: ${currentMode}</span>
+
                 </div>
                 <div class="bg-slate-50 dark:bg-bg-panel text-slate-700 dark:text-slate-200 p-4 rounded-2xl rounded-tl-sm border border-slate-100 dark:border-slate-700 shadow-sm dark:shadow-card-dk">
                     ${thinkingLog}
