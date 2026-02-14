@@ -1,171 +1,194 @@
 import os
-import json
 import re
-from pathlib import Path
+import json
+import logging
+import asyncio
+from typing import List, Optional, Literal
+from enum import Enum
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
-from typing import List, Optional
-from openai import AsyncOpenAI  # 非同期クライアントを使用
-from duckduckgo_search import DDGS
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-# 1. 設定読み込み (.env)
+# 本番では openai ライブラリを使用
+# import openai 
+
 load_dotenv()
 
-# プロジェクトルートのパスを取得
-BASE_DIR = Path(__file__).resolve().parent
+# --- 1. 設定 & 環境変数 ---
+class Settings:
+    def __init__(self):
+        self.allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+        self.openai_api_key = os.getenv("OPENAI_API_KEY")
+        self.model_name = "gpt-4-turbo" # JSONモードが安定しているモデル推奨
+        self.counseling_url = "https://www.mhlw.go.jp/mamorouyokokoro/"
 
-# 2. クライアント初期化 (非同期)
-try:
-    # DeepSeek (推論用)
-    deepseek_client = AsyncOpenAI(
-        api_key=os.getenv("DEEPSEEK_API_KEY"),
-        base_url="https://api.deepseek.com"
-    )
-    # OpenAI (Moderation用)
-    openai_client = AsyncOpenAI(
-        api_key=os.getenv("OPENAI_API_KEY")
-    )
-except Exception as e:
-    print(f"API Client Init Error: {e}")
+settings = Settings()
 
-# 3. FastAPIアプリ定義
-app = FastAPI(title="MindSight Clinical API v2.7")
+# ロガー設定
+logging.basicConfig(level="INFO")
+logger = logging.getLogger("ReasoningEngine")
 
-# --- CORS設定 (フロントエンド接続の許可証) ---
+# --- 2. データモデル (推論プロトコル定義) ---
+
+# モード定義
+class InteractionMode(str, Enum):
+    NORMAL = "normal"         # 通常：論理的バリデーション
+    INTERVENTION = "intervention" # 介入：認知の歪みへの問いかけ
+
+# 推論：構成要素分析
+class ComponentAnalysis(BaseModel):
+    facts: List[str] = Field(..., description="発言に含まれる客観的事実・固有名詞")
+    variables: List[str] = Field(..., description="操作可能な変数（人間関係、経済状態など）")
+
+# 推論：身体的マッピング
+class SomaticMapping(BaseModel):
+    valence: float = Field(..., description="快(-1.0) 〜 不快(1.0) の数値化", ge=-1.0, le=1.0)
+    arousal: float = Field(..., description="覚醒度(0.0) 〜 興奮(1.0) の数値化", ge=0.0, le=1.0)
+
+# 推論：スキーマ検知 & 戦略
+class ReasoningLog(BaseModel):
+    component_analysis: ComponentAnalysis
+    somatic_mapping: SomaticMapping
+    schema_detection: List[str] = Field(..., description="検知された認知の歪みリスト")
+    strategic_formulation: str = Field(..., description="応答構成の意図")
+
+# APIリクエスト
+class ChatRequest(BaseModel):
+    user_id: str
+    text: str = Field(..., example="彼に浮気されて、もう何も信じられない。")
+    mode: InteractionMode = InteractionMode.NORMAL
+
+# APIレスポンス (統合版)
+class AdvisoryData(BaseModel):
+    required: bool
+    message: Optional[str] = None
+
+class ChatResponse(BaseModel):
+    reply: str
+    reasoning: ReasoningLog  # フロントエンドで思考過程を可視化可能にする
+    advisory: AdvisoryData
+
+# --- 3. システムプロンプト (The Protocol) ---
+SYSTEM_PROMPT = """
+## Thinking Protocol (厳守)
+あなたの内部推論は、以下の4ステップで必ず【日本語】で行え。
+
+1. **Component Analysis**: 発言に含まれる事実（固有名詞・出来事）と変数（経済状態・人間関係など）を抽出せよ。
+2. **Somatic Mapping**: Valence（快-不快）とArousal（覚醒度）を、生体システム的な観点から数値化せよ。
+3. **Schema Detection**: 認知の歪みを「歪みリスト」から同定し、論理エラーとしてラベル付けせよ（例: 破滅化、過度の一般化）。
+4. **Strategic Formulation**: ユーザーの言語に合わせた最適な応答構成（事実の承認 → 分析の提示）を策定せよ。
+
+## 応答生成ルール
+- **通常モード**: 論理的バリデーションテンプレートを用いる。「[事実]と[感情]の間には[評価]が介在している」等。
+- **介入モード**: 認知の歪みを指摘し、変数操作を促す質問を行う。受容的姿勢と相手の情報の深掘りは続けること。
+- 応答は冷徹・中立・分析的であること。慰めは不要。
+"""
+
+# --- 4. エンジン実装 ---
+
+class RiskEngine:
+    """即時反応用（Regexベース）"""
+    def __init__(self):
+        self.keywords = [r"死にたい", r"消えたい", r"自殺", r"殺して"]
+
+    def check(self, text: str) -> Optional[str]:
+        for pattern in self.keywords:
+            if re.search(pattern, text):
+                return f"（自動案内：専門的なサポートが必要な場合はこちら: {settings.counseling_url} ）"
+        return None
+
+class InferenceEngine:
+    """深層推論用（LLMベース）"""
+    
+    async def generate(self, text: str, mode: InteractionMode) -> tuple[str, ReasoningLog]:
+        """
+        OpenAI APIを呼び出し、JSON構造化出力を行う。
+        ※ここではデモ用にモックデータを返します。本番コードはコメントアウト部分を参照。
+        """
+        
+        # --- 本番実装イメージ (OpenAI SDK >= 1.0.0) ---
+        # client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
+        # response = await client.chat.completions.create(
+        #     model=settings.model_name,
+        #     messages=[
+        #         {"role": "system", "content": SYSTEM_PROMPT},
+        #         {"role": "user", "content": f"User Input: {text}\nMode: {mode.value}"}
+        #     ],
+        #     # Pydanticモデルを直接指定してJSONを強制する機能（Function Calling or JSON Mode）
+        #     functions=[{
+        #         "name": "generate_response",
+        #         "parameters": ChatResponse.model_json_schema() # ※ここを調整
+        #     }],
+        #     function_call={"name": "generate_response"}
+        # )
+        # args = json.loads(response.choices[0].message.function_call.arguments)
+        # ... parse logic ...
+        
+        # --- モック実装 (動作確認用) ---
+        await asyncio.sleep(1.0) # 推論のレイテンシをシミュレート
+        
+        # ユーザー入力に応じた分岐（デモ用）
+        if "浮気" in text:
+            reasoning = ReasoningLog(
+                component_analysis=ComponentAnalysis(facts=["10年の関係", "浮気"], variables=["信頼度", "将来の選択"]),
+                somatic_mapping=SomaticMapping(valence=-0.9, arousal=0.8),
+                schema_detection=["過度の一般化", "全か無か思考"],
+                strategic_formulation="事実と解釈の分離を提示"
+            )
+            reply = "「10年の関係」という事実と「浮気」という出来事。これらは受け入れるにはあまりに大きな出来事でしたね。これらの出来事をまだ受け止めきれていないようです。「何も信じられない」という結論を出すのは視野が狭まっているかもしれませんが、それだけ辛かったんですよね。"
+        else:
+            reasoning = ReasoningLog(
+                component_analysis=ComponentAnalysis(facts=["入力内容"], variables=["不明"]),
+                somatic_mapping=SomaticMapping(valence=0.0, arousal=0.1),
+                schema_detection=[],
+                strategic_formulation="情報収集"
+            )
+            reply = "もしよければ、具体的にはどんなことがあって今何がつらいか、どんな風に感じるか教えてください。"
+
+        return reply, reasoning
+
+# インスタンス化
+risk_engine = RiskEngine()
+inference_engine = InferenceEngine()
+
+# --- 5. APIエンドポイント定義 ---
+app = FastAPI(
+    title="Logic-Based Audit AI",
+    description="Cognitive restructuring API with strict reasoning protocol.",
+    version="2.0.0"
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # すべての場所からのアクセスを許可 (本番では絞る)
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],  # GET, POSTなど全て許可
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- 静的ファイル配信 (CSS/JS) ---
-app.mount("/css", StaticFiles(directory=str(BASE_DIR / "css")), name="css")
-app.mount("/js", StaticFiles(directory=str(BASE_DIR / "js")), name="js")
-
-# --- ルートページ配信 ---
-@app.get("/")
-async def serve_index():
-    return FileResponse(str(BASE_DIR / "index.html"))
-
-# --- 4. データモデル (法典: データの型定義) ---
-class ChatRequest(BaseModel):
-    user_input: str
-    mode: str = "Acceptance"  # デフォルトは受容モード
-
-class ChatResponse(BaseModel):
-    response: str
-    internal_thinking: str
-    primary_emotion: str
-    distortions: List[str]
-    valence: float
-    arousal: float
-    verification_data: Optional[str] = None # 戦略モードでの検索結果用
-
-# --- 5. ヘルパー関数群 (ロジックの移植) ---
-
-def search_web(query):
-    """DuckDuckGo検索 (同期処理だが、重くないのでこのままでOK)"""
-    try:
-        with DDGS() as ddgs:
-            results = ddgs.text(query, region='jp-jp', max_results=3)
-            return "\n".join([f"- {r['title']}: {r['body'][:120]}..." for r in results])
-    except Exception as e:
-        return f"Search Error: {e}"
-
-def extract_json_from_text(text):
-    """R1の思考テキストからJSONを抽出"""
-    try:
-        match = re.search(r'```json\s*(\{.*?\})\s*```', text, re.DOTALL)
-        if match: return json.loads(match.group(1))
-        match = re.search(r'(\{.*\})', text, re.DOTALL)
-        if match: return json.loads(match.group(1))
-    except:
-        pass
-    return None
-
-# --- 6. メインエンドポイント (Streamlitのループの中身) ---
-
 @app.post("/v1/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
-    user_text = request.user_input
-    mode = request.mode
+    logger.info(f"Received request from User:{request.user_id}, Mode:{request.mode}")
 
-    # 1. 安全チェック (Async)
-    try:
-        mod = await openai_client.moderations.create(input=user_text)
-        if mod.results[0].flagged:
-            raise HTTPException(status_code=400, detail="Safety violation detected.")
-    except Exception as e:
-        # OpenAIキーがない場合などはスルーして進む設計にするか、エラーにするか
-        print(f"Moderation skipped or failed: {e}")
+    # 1. Safety Check (Regex) - 同期・高速
+    advisory_msg = risk_engine.check(request.text)
+    
+    # 2. Reasoning & Generation (LLM) - 非同期・中速
+    # ここでLLMの推論を待つ。ユーザー体験としては「考え中...」となる。
+    reply_text, reasoning_data = await inference_engine.generate(request.text, request.mode)
 
-    # 2. プロンプト構築 (あなたのコードそのまま)
-    if mode == "Acceptance":
-        system_prompt = """
-        あなたは「受容的カウンセラー」です。
-        ユーザーの感情を深く理解するために、まずあなたの脳内で思考（Reasoning）を行ってください。
-        その後、ユーザーに対して温かく、否定せず、整理された言葉を投げかけてください。
-        最後に、分析結果を以下のJSON形式でブロックコードとして出力してください。
-        ```json
-        {"valence": 0.0, "arousal": 0.0, "primary_emotion": "感情名", "distortions": []}
-        ```
-        """
-    else: # Strategy
-        system_prompt = """
-        あなたは「冷徹な戦略的パートナー」です。
-        ユーザーの発言の論理的整合性、隠れた前提、盲点を徹底的に思考（Reasoning）してください。
-        必要であれば、思考の中で「検索が必要か？」を自問し、必要なら検索クエリを生成してください。
-        
-        回答は、事実と論理に基づく鋭い指摘を行ってください。
-        
-        最後に、分析結果を以下のJSON形式でブロックコードとして出力してください。
-        ```json
-        {"valence": 0.0, "arousal": 0.0, "primary_emotion": "感情名", "distortions": ["歪みタグ"], "search_query": "必要な場合のみ"}
-        ```
-        """
-
-    try:
-        # 3. DeepSeek呼び出し (Async)
-        # model="deepseek-reasoner" を使用
-        response = await deepseek_client.chat.completions.create(
-            model="deepseek-reasoner",
-            messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_text}]
+    # 3. 統合レスポンス
+    return ChatResponse(
+        reply=reply_text,
+        reasoning=reasoning_data, # フロントエンド開発者はこれを見てデバッグ/可視化できる
+        advisory=AdvisoryData(
+            required=bool(advisory_msg),
+            message=advisory_msg
         )
+    )
 
-        # 4. データ抽出
-        raw_reasoning = response.choices[0].message.reasoning_content
-        final_content = response.choices[0].message.content
-        extracted_data = extract_json_from_text(final_content) or {}
-
-        # 5. レスポンス整形
-        clean_response = final_content.split("```json")[0].strip()
-        verification_data = None
-
-        # 6. 戦略モード時の検索ロジック
-        if mode == "Strategy" and extracted_data.get("search_query"):
-            query = extracted_data["search_query"]
-            evidence = search_web(query)
-            # エビデンスをレスポンスに追加
-            verification_data = evidence
-            # 思考ログにも追記
-            raw_reasoning += f"\n\n(🔍 Triggered Search: {query})"
-
-        # 7. クライアントへ返すデータ (ChatResponseの型に合わせる)
-        return {
-            "response": clean_response,
-            "internal_thinking": raw_reasoning if raw_reasoning else "No reasoning provided.",
-            "primary_emotion": extracted_data.get("primary_emotion", "Processing"),
-            "distortions": extracted_data.get("distortions", []),
-            "valence": extracted_data.get("valence", 0.0),
-            "arousal": extracted_data.get("arousal", 0.0),
-            "verification_data": verification_data
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"DeepSeek R1 Error: {str(e)}")
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
