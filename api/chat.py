@@ -100,6 +100,15 @@ def _extract_json_block(text: str) -> tuple:
 # --- FastAPI App ---
 app = FastAPI()
 
+import traceback
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    tb = traceback.format_exc()
+    return JSONResponse(
+        status_code=500,
+        content={"error": str(exc), "traceback": tb}
+    )
+
 # allow_credentials=True は allow_origins="*" と併用不可（ブラウザ仕様）
 app.add_middleware(
     CORSMiddleware,
