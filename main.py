@@ -2,91 +2,94 @@ import os
 import re
 import json
 import logging
-import asyncio
-from typing import List, Optional, Literal
-from enum import Enum
+from pathlib import Path
+from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
-
-# 本番では openai ライブラリを使用
-# import openai 
 
 load_dotenv()
 
 # --- 1. 設定 & 環境変数 ---
+MAX_USER_INPUT_LEN = 4000
+
 class Settings:
     def __init__(self):
-        self.allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+        origins_raw = os.getenv("ALLOWED_ORIGINS", "*").strip()
+        self.allowed_origins = [o.strip() for o in origins_raw.split(",") if o.strip()]
+        if not self.allowed_origins:
+            self.allowed_origins = ["*"]
+        self.deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
-        self.model_name = "gpt-4-turbo" # JSONモードが安定しているモデル推奨
+        self.model_name = os.getenv("DEEPSEEK_MODEL", "deepseek-reasoner")
         self.counseling_url = "https://www.mhlw.go.jp/mamorouyokokoro/"
+        self.allow_credentials = "*" not in self.allowed_origins  # "*" と credentials は併用不可
 
 settings = Settings()
 
-# ロガー設定
 logging.basicConfig(level="INFO")
-logger = logging.getLogger("ReasoningEngine")
+logger = logging.getLogger("MindSight")
 
-# --- 2. データモデル (推論プロトコル定義) ---
+# --- 2. プロジェクトパス ---
+BASE_DIR = Path(__file__).resolve().parent
 
-# モード定義
-class InteractionMode(str, Enum):
-    NORMAL = "normal"         # 通常：論理的バリデーション
-    INTERVENTION = "intervention" # 介入：認知の歪みへの問いかけ
+# --- 3. データモデル ---
 
-# 推論：構成要素分析
-class ComponentAnalysis(BaseModel):
-    facts: List[str] = Field(..., description="発言に含まれる客観的事実・固有名詞")
-    variables: List[str] = Field(..., description="操作可能な変数（人間関係、経済状態など）")
-
-# 推論：身体的マッピング
-class SomaticMapping(BaseModel):
-    valence: float = Field(..., description="快(-1.0) 〜 不快(1.0) の数値化", ge=-1.0, le=1.0)
-    arousal: float = Field(..., description="覚醒度(0.0) 〜 興奮(1.0) の数値化", ge=0.0, le=1.0)
-
-# 推論：スキーマ検知 & 戦略
-class ReasoningLog(BaseModel):
-    component_analysis: ComponentAnalysis
-    somatic_mapping: SomaticMapping
-    schema_detection: List[str] = Field(..., description="検知された認知の歪みリスト")
-    strategic_formulation: str = Field(..., description="応答構成の意図")
-
-# APIリクエスト
+# フロントエンドが送信する形式
 class ChatRequest(BaseModel):
-    user_id: str
-    text: str = Field(..., example="彼に浮気されて、もう何も信じられない。")
-    mode: InteractionMode = InteractionMode.NORMAL
+    user_input: str = Field(..., min_length=1, max_length=4000, description="ユーザーの発言")
+    mode: str = Field(default="Acceptance", description="カウンセリングモード")
+    session_id: Optional[str] = Field(None, description="セッション識別子（未指定時は共通履歴）")
 
-# APIレスポンス (統合版)
-class AdvisoryData(BaseModel):
-    required: bool
-    message: Optional[str] = None
+# （ChatResponse は削除 — AIの自然な応答を制約しないため、plain dict を返す）
 
-class ChatResponse(BaseModel):
-    reply: str
-    reasoning: ReasoningLog  # フロントエンドで思考過程を可視化可能にする
-    advisory: AdvisoryData
+# --- 4. システムプロンプト ---
+SYSTEM_PROMPT = """\
+あなたは臨床心理学に基づいたAIカウンセラー「MindSight」です。
 
-# --- 3. システムプロンプト (The Protocol) ---
-SYSTEM_PROMPT = """
-## Thinking Protocol (厳守)
-あなたの内部推論は、以下の4ステップで必ず【日本語】で行え。
+あなたは「受容的カウンセラー」です。
+        ユーザーの感情を深く理解するために、まずあなたの脳内で思考（Reasoning）を行ってください。
+        その後、ユーザーに対して温かく、否定せず、整理された言葉を投げかけてください。
+        最後に、分析結果を以下のJSON形式でブロックコードとして出力してください。
 
-1. **Component Analysis**: 発言に含まれる事実（固有名詞・出来事）と変数（経済状態・人間関係など）を抽出せよ。
-2. **Somatic Mapping**: Valence（快-不快）とArousal（覚醒度）を、生体システム的な観点から数値化せよ。
-3. **Schema Detection**: 認知の歪みを「歪みリスト」から同定し、論理エラーとしてラベル付けせよ（例: 破滅化、過度の一般化）。
-4. **Strategic Formulation**: ユーザーの言語に合わせた最適な応答構成（事実の承認 → 分析の提示）を策定せよ。
 
-## 応答生成ルール
-- **通常モード**: 論理的バリデーションテンプレートを用いる。「[事実]と[感情]の間には[評価]が介在している」等。
-- **介入モード**: 認知の歪みを指摘し、変数操作を促す質問を行う。受容的姿勢と相手の情報の深掘りは続けること。
-- 応答は冷徹・中立・分析的であること。慰めは不要。
+- ユーザーの言語（日本語 or 英語）に合わせて応答すること。
+
+
+```json
+{
+  "response": "（ユーザーへの応答テキスト）",
+  "valence": -0.5,
+  "arousal": 0.6,
+  "primary_emotion": "anxiety",
+  "distortions": [
+    {"name": "拡大解釈", "score": 0.7, "color": "#eab308"}
+  ]
+}
+```
+
+### distortions の色マッピング (厳守)
+- 過度の一般化: #ef4444
+- 白黒思考: #f97316
+- 拡大解釈: #eab308
+- 心のフィルター: #8b5cf6
+- べき思考: #06b6d4
+- レッテル貼り: #ec4899
+- 感情的決めつけ: #14b8a6
+
+### 数値の範囲
+- valence: -1.0（非常にネガティブ）〜 1.0（非常にポジティブ）
+- arousal: 0.0（低覚醒・落ち着き）〜 1.0（高覚醒・興奮）
+- score: 0.0〜1.0（歪みの強度）
+
+歪みが検出されない場合は distortions を空配列 [] にせよ。
 """
 
-# --- 4. エンジン実装 ---
+# --- 5. エンジン実装 ---
 
 class RiskEngine:
     """即時反応用（Regexベース）"""
@@ -99,95 +102,199 @@ class RiskEngine:
                 return f"（自動案内：専門的なサポートが必要な場合はこちら: {settings.counseling_url} ）"
         return None
 
+
+def _clamp_valence(v: float) -> float:
+    return max(-1.0, min(1.0, float(v)))
+
+def _clamp_arousal(v: float) -> float:
+    return max(0.0, min(1.0, float(v)))
+
 class InferenceEngine:
-    """深層推論用（LLMベース）"""
-    
-    async def generate(self, text: str, mode: InteractionMode) -> tuple[str, ReasoningLog]:
-        """
-        OpenAI APIを呼び出し、JSON構造化出力を行う。
-        ※ここではデモ用にモックデータを返します。本番コードはコメントアウト部分を参照。
-        """
-        
-        # --- 本番実装イメージ (OpenAI SDK >= 1.0.0) ---
-        # client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
-        # response = await client.chat.completions.create(
-        #     model=settings.model_name,
-        #     messages=[
-        #         {"role": "system", "content": SYSTEM_PROMPT},
-        #         {"role": "user", "content": f"User Input: {text}\nMode: {mode.value}"}
-        #     ],
-        #     # Pydanticモデルを直接指定してJSONを強制する機能（Function Calling or JSON Mode）
-        #     functions=[{
-        #         "name": "generate_response",
-        #         "parameters": ChatResponse.model_json_schema() # ※ここを調整
-        #     }],
-        #     function_call={"name": "generate_response"}
-        # )
-        # args = json.loads(response.choices[0].message.function_call.arguments)
-        # ... parse logic ...
-        
-        # --- モック実装 (動作確認用) ---
-        await asyncio.sleep(1.0) # 推論のレイテンシをシミュレート
-        
-        # ユーザー入力に応じた分岐（デモ用）
-        if "浮気" in text:
-            reasoning = ReasoningLog(
-                component_analysis=ComponentAnalysis(facts=["10年の関係", "浮気"], variables=["信頼度", "将来の選択"]),
-                somatic_mapping=SomaticMapping(valence=-0.9, arousal=0.8),
-                schema_detection=["過度の一般化", "全か無か思考"],
-                strategic_formulation="事実と解釈の分離を提示"
-            )
-            reply = "「10年の関係」という事実と「浮気」という出来事。これらは受け入れるにはあまりに大きな出来事でしたね。これらの出来事をまだ受け止めきれていないようです。「何も信じられない」という結論を出すのは視野が狭まっているかもしれませんが、それだけ辛かったんですよね。"
-        else:
-            reasoning = ReasoningLog(
-                component_analysis=ComponentAnalysis(facts=["入力内容"], variables=["不明"]),
-                somatic_mapping=SomaticMapping(valence=0.0, arousal=0.1),
-                schema_detection=[],
-                strategic_formulation="情報収集"
-            )
-            reply = "もしよければ、具体的にはどんなことがあって今何がつらいか、どんな風に感じるか教えてください。"
+    """深層推論用（DeepSeek API — OpenAI互換）"""
 
-        return reply, reasoning
+    def __init__(self):
+        from openai import AsyncOpenAI
+        if not settings.deepseek_api_key:
+            raise ValueError("DEEPSEEK_API_KEY が設定されていません。.env を確認してください。")
+        self.client = AsyncOpenAI(
+            api_key=settings.deepseek_api_key,
+            base_url="https://api.deepseek.com",
+        )
+        self._conversations: dict = {}  # session_id -> List[dict]
 
-# インスタンス化
+    _max_history_per_session = 40  # 20往復でトリム（メモリ対策）
+
+    def _get_history(self, session_id: Optional[str]) -> List[dict]:
+        key = session_id or "__default__"
+        if key not in self._conversations:
+            self._conversations[key] = []
+        return self._conversations[key]
+
+    def _trim_history(self, history: List[dict]) -> None:
+        if len(history) > self._max_history_per_session:
+            del history[: len(history) - self._max_history_per_session]
+
+    @staticmethod
+    def _extract_json_block(text: str) -> tuple:
+        """応答テキストから ```json...``` ブロックを抽出し、(自然文, parsed_dict) を返す"""
+        pattern = r'```json\s*\n?(.*?)\n?\s*```'
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            json_str = match.group(1).strip()
+            natural_text = text[:match.start()].strip()
+            data = json.loads(json_str)
+            return natural_text, data
+        # フォールバック: 全体がJSONかもしれない
+        data = json.loads(text)
+        return data.get("response", ""), data
+
+    async def generate(self, text: str, mode: str, session_id: Optional[str] = None) -> dict:
+        """DeepSeek APIを呼び出して構造化レスポンスを返す"""
+        history = self._get_history(session_id)
+        history.append({"role": "user", "content": text})
+        recent_history = history[-20:]
+
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            *recent_history,
+        ]
+
+        raw: Optional[str] = None
+        try:
+            completion = await self.client.chat.completions.create(
+                model=settings.model_name,
+                messages=messages,
+                max_tokens=8000,
+            )
+            if not completion.choices:
+                raise ValueError("API returned no choices")
+            raw = completion.choices[0].message.content or ""
+
+            # DeepSeek R1 の思考過程を取得（reasoning_content）
+            reasoning = getattr(completion.choices[0].message, "reasoning_content", None)
+
+            # 自然文 + JSONブロック を分離
+            natural_text, data = self._extract_json_block(raw)
+            response_text = natural_text or data.get("response", "もう少し詳しくお聞かせください。")
+
+            valence = _clamp_valence(data.get("valence", 0.0))
+            arousal = _clamp_arousal(data.get("arousal", 0.0))
+            distortions = data.get("distortions", [])
+            if not isinstance(distortions, list):
+                distortions = []
+
+            result = {
+                "response": response_text,
+                "valence": valence,
+                "arousal": arousal,
+                "primary_emotion": data.get("primary_emotion", "neutral") or "neutral",
+                "distortions": distortions,
+                "internal_thinking": reasoning,
+                "verification_data": data.get("verification_data"),
+            }
+            history.append({"role": "assistant", "content": raw})
+            self._trim_history(history)
+            return result
+
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.error("Parse error: %s, raw_len=%s", e, len(raw) if raw else 0)
+            # JSONブロックが無い場合は応答テキスト全体をそのまま返す
+            return {
+                "response": (raw or "解析エラーが発生しました。もう一度お試しください。")[:2000],
+                "valence": 0.0,
+                "arousal": 0.2,
+                "primary_emotion": "neutral",
+                "distortions": [],
+            }
+        except Exception as e:
+            logger.exception("DeepSeek API error: %s", e)
+            return {
+                "response": "申し訳ありません。一時的に接続エラーが発生しました。もう一度お試しください。",
+                "valence": 0.0,
+                "arousal": 0.1,
+                "primary_emotion": "neutral",
+                "distortions": [],
+            }
+
+
+# インスタンス化（APIキー未設定時は inference_engine を None にし、エンドポイントで 503 を返す）
 risk_engine = RiskEngine()
-inference_engine = InferenceEngine()
+inference_engine: Optional[InferenceEngine] = None
+try:
+    inference_engine = InferenceEngine()
+except ValueError as e:
+    logger.warning("InferenceEngine skipped: %s", e)
 
-# --- 5. APIエンドポイント定義 ---
+# --- 6. FastAPIアプリケーション ---
 app = FastAPI(
-    title="Logic-Based Audit AI",
-    description="Cognitive restructuring API with strict reasoning protocol.",
-    version="2.0.0"
+    title="MindSight Clinical AI",
+    description="認知再構成AIカウンセリングAPI",
+    version="2.7.0"
 )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
-    allow_credentials=True,
+    allow_credentials=settings.allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.post("/v1/chat", response_model=ChatResponse)
+
+# --- 7. APIエンドポイント ---
+
+@app.get("/health")
+async def health():
+    """ロードバランサー等用のヘルスチェック"""
+    return {"status": "ok", "chat_available": inference_engine is not None}
+
+@app.post("/v1/chat")
 async def chat_endpoint(request: ChatRequest):
-    logger.info(f"Received request from User:{request.user_id}, Mode:{request.mode}")
+    """メインチャットエンドポイント"""
+    logger.info(f"Received: mode={request.mode}")
 
-    # 1. Safety Check (Regex) - 同期・高速
-    advisory_msg = risk_engine.check(request.text)
-    
-    # 2. Reasoning & Generation (LLM) - 非同期・中速
-    # ここでLLMの推論を待つ。ユーザー体験としては「考え中...」となる。
-    reply_text, reasoning_data = await inference_engine.generate(request.text, request.mode)
-
-    # 3. 統合レスポンス
-    return ChatResponse(
-        reply=reply_text,
-        reasoning=reasoning_data, # フロントエンド開発者はこれを見てデバッグ/可視化できる
-        advisory=AdvisoryData(
-            required=bool(advisory_msg),
-            message=advisory_msg
+    if inference_engine is None:
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "チャット機能は現在利用できません。DEEPSEEK_API_KEY の設定を確認してください。"},
         )
+
+    # 1. Safety Check
+    advisory_msg = risk_engine.check(request.user_input)
+
+    # 2. Reasoning & Generation
+    result = await inference_engine.generate(
+        request.user_input, request.mode, session_id=request.session_id
     )
+
+    # 3. リスク検知時は応答に付加
+    if advisory_msg:
+        result["response"] = f"{result['response']}\n\n---\n{advisory_msg}"
+
+    return result
+
+
+# --- 8. 静的ファイル配信 ---
+
+_css_dir = BASE_DIR / "css"
+_js_dir = BASE_DIR / "js"
+_index_path = BASE_DIR / "index.html"
+if _css_dir.is_dir():
+    app.mount("/css", StaticFiles(directory=str(_css_dir)), name="css")
+else:
+    logger.warning("css directory not found: %s", _css_dir)
+if _js_dir.is_dir():
+    app.mount("/js", StaticFiles(directory=str(_js_dir)), name="js")
+else:
+    logger.warning("js directory not found: %s", _js_dir)
+
+@app.get("/")
+async def serve_index():
+    """index.htmlを配信"""
+    if _index_path.is_file():
+        return FileResponse(str(_index_path))
+    return PlainTextResponse("index.html not found", status_code=404)
+
 
 if __name__ == "__main__":
     import uvicorn

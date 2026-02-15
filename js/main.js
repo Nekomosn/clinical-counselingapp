@@ -1,6 +1,16 @@
 // js/main.js — MindSight Clinical AI v2.0
 
 const API_URL = "/v1/chat";
+const MAX_INPUT_LEN = 4000;
+
+function getOrCreateSessionId() {
+    let id = sessionStorage.getItem("mindsight_session_id");
+    if (!id) {
+        id = "s_" + Date.now() + "_" + Math.random().toString(36).slice(2, 11);
+        sessionStorage.setItem("mindsight_session_id", id);
+    }
+    return id;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -114,8 +124,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 6. Character Count
     // ========================================
     if (inputField && charCount) {
+        inputField.setAttribute("maxlength", String(MAX_INPUT_LEN));
         inputField.addEventListener('input', () => {
-            charCount.textContent = inputField.value.length;
+            const len = inputField.value.length;
+            charCount.textContent = len;
+            if (len >= MAX_INPUT_LEN) charCount.classList.add("text-amber-500");
+            else charCount.classList.remove("text-amber-500");
         });
     }
 
@@ -150,12 +164,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_input: text, mode: currentMode })
+                body: JSON.stringify({
+                    user_input: text,
+                    mode: currentMode,
+                    session_id: getOrCreateSessionId()
+                })
             });
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.detail || `API Error (${response.status})`);
+                const detail = errData.detail;
+                const msg = typeof detail === "string"
+                    ? detail
+                    : Array.isArray(detail) && detail[0]?.msg
+                        ? detail[0].msg
+                        : `API Error (${response.status})`;
+                throw new Error(msg);
             }
 
             const data = await response.json();
@@ -249,9 +273,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const colors = ['#13daec', '#f97316', '#ef4444', '#8b5cf6', '#22c55e', '#ec4899', '#eab308'];
         if (distortionCount) distortionCount.textContent = `${distortions.length} found`;
 
-        const html = distortions.map((name, i) => {
-            const color = colors[i % colors.length];
-            const widthPct = Math.max(20, 90 - (i * 15));
+        const html = distortions.map((d, i) => {
+            const name = (typeof d === 'string') ? d : (d.name || 'Unknown');
+            const color = (typeof d === 'object' && d.color) ? d.color : colors[i % colors.length];
+            const widthPct = (typeof d === 'object' && d.score) ? Math.round(d.score * 100) : Math.max(20, 90 - (i * 15));
             return `
                 <div class="space-y-1 fade-in" style="animation-delay: ${i * 0.08}s">
                     <div class="flex justify-between text-xs">
@@ -438,8 +463,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function generateSessionSummary() {
         const aiMsgs = chatHistory.filter(m => m.role === 'assistant' && m.meta);
         if (aiMsgs.length === 0) return null;
-        const avgV = aiMsgs.reduce((s, m) => s + m.meta.valence, 0) / aiMsgs.length;
-        const avgA = aiMsgs.reduce((s, m) => s + m.meta.arousal, 0) / aiMsgs.length;
+        const avgV = aiMsgs.reduce((s, m) => s + (m.meta?.valence ?? 0), 0) / aiMsgs.length;
+        const avgA = aiMsgs.reduce((s, m) => s + (m.meta?.arousal ?? 0), 0) / aiMsgs.length;
         return { message_count: chatHistory.length, avg_valence: avgV.toFixed(2), avg_arousal: avgA.toFixed(2) };
     }
 
